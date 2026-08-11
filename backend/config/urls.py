@@ -11,6 +11,8 @@ from transactions.views import (
     GoalTransactionViewSet,
     BudgetViewSet,
     UserLoanLimitViewSet,
+    BillerCategoryViewSet,
+    BillPaymentViewSet,
 )
 from core.views import signup, login, UserDetailView, SecuritySettingsViewSet
 from loans.views import LoanViewSet, LoanProductViewSet
@@ -26,6 +28,8 @@ router.register(r"savings-goals", SavingsGoalViewSet)
 router.register(r"goal-transactions", GoalTransactionViewSet)
 router.register(r"budgets", BudgetViewSet)
 router.register(r"user-loan-limits", UserLoanLimitViewSet)
+router.register(r"biller-categories", BillerCategoryViewSet)
+router.register(r"bill-payments", BillPaymentViewSet, basename='bill-payment')
 router.register(r"security-settings", SecuritySettingsViewSet)
 router.register(r"loans", LoanViewSet)
 router.register(r"loan-products", LoanProductViewSet)

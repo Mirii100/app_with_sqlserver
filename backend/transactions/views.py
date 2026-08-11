@@ -1,18 +1,57 @@
 from decimal import Decimal
 from django.db import transaction
 from django.db.models import F
+from django.utils import timezone
+from django.contrib.auth import get_user_model
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from accounts.models import Account
-from .models import Transaction, SavingsGoal, GoalTransaction, Budget, UserLoanLimit
-from .serializers import TransactionSerializer, SavingsGoalSerializer, GoalTransactionSerializer, BudgetSerializer, UserLoanLimitSerializer
-from django.utils import timezone
+from .models import BillerCategory, Transaction, SavingsGoal, GoalTransaction, Budget, UserLoanLimit
+from .serializers import BillerCategorySerializer, TransactionSerializer, SavingsGoalSerializer, GoalTransactionSerializer, BudgetSerializer, UserLoanLimitSerializer
 
 User = get_user_model()
 
+class BillPaymentViewSet(viewsets.ViewSet):
+    def create(self, request):
+        user_id = request.data.get('user')
+        amount = request.data.get('amount')
+        category = request.data.get('category')
+        description = request.data.get('description')
+        biller_id = request.data.get('biller')
+
+        if not all([user_id, amount, category, biller_id]):
+            return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            account = Account.objects.get(user_id=user_id)
+        except Account.DoesNotExist:
+            return Response({'error': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        amount_value = Decimal(str(amount))
+
+        if account.balance < amount_value:
+            return Response({'error': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            account.balance -= amount_value
+            account.save()
+
+            Transaction.objects.create(
+                user=account.user,
+                amount=amount_value,
+                category=category,
+                type='withdrawal',
+                description=description or f"Payment to {biller_id}",
+                date=timezone.now(),
+            )
+
+        return Response({'status': 'success'}, status=status.HTTP_201_CREATED)
+
+class BillerCategoryViewSet(viewsets.ModelViewSet):
+    queryset = BillerCategory.objects.all()
+    serializer_class = BillerCategorySerializer
 
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.select_related('user')
@@ -55,20 +94,6 @@ class TransactionViewSet(viewsets.ModelViewSet):
             User.objects.filter(id=sender.id).update(balance=F('balance') - amount_value)
             User.objects.filter(id=recipient.id).update(balance=F('balance') + amount_value)
 
-            # Transaction.objects.create(
-            #     user=sender,
-            #     amount=amount_value,
-            #     category='transfer_out',
-            #     type='withdrawal',
-            #     description=f"Transfer to {recipient.phone_number}",
-            # )
-            # Transaction.objects.create(
-            #     user=recipient,
-            #     amount=amount_value,
-            #     category='transfer_in',
-            #     type='deposit',
-            #     description=f"Transfer from {sender.phone_number}",
-            # )
             Transaction.objects.create(
                     user=sender,
                     amount=amount_value,
@@ -87,13 +112,10 @@ class TransactionViewSet(viewsets.ModelViewSet):
                 date=timezone.now(),
             )
 
-            
-
         sender.refresh_from_db()
         recipient.refresh_from_db()
 
         return Response({'status': 'success', 'reference': request.data.get('reference', '')}, status=status.HTTP_201_CREATED)
-
 
 class SavingsGoalViewSet(viewsets.ModelViewSet):
     queryset = SavingsGoal.objects.all()

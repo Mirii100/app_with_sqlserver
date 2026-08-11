@@ -8,7 +8,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'email', 'password', 'phone_number',
-            'national_id', 'county', 'town', 'postal_code',
+            'full_name', 'national_id', 'county', 'town', 'postal_code',
             'employment_type', 'monthly_income',
             'account_number',
         ]
@@ -32,7 +32,6 @@ class UserSignupSerializer(serializers.ModelSerializer):
         return user
 
 class UserSerializer(serializers.ModelSerializer):
-    full_name = serializers.SerializerMethodField()
     phone = serializers.CharField(
         source='phone_number',
         read_only=True
@@ -66,9 +65,6 @@ class UserSerializer(serializers.ModelSerializer):
             'account_number',
         ]
         read_only_fields = ['account_number', 'balance', 'loan_limit', 'loan_used']
-
-    def get_full_name(self, obj):
-        return obj.get_full_name() or obj.username
 
     def get_biometric_enabled(self, obj):
         try:
@@ -106,12 +102,6 @@ class SecuritySettingsSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data.pop('pin_hash', None)
-        data.pop('last_pin_changed', None)
-        return data
-
-    def to_representation(self, instance):
-        data = super.to_representation(instance)
         data.pop('pin_hash', None)
         data.pop('last_pin_changed', None)
         return data

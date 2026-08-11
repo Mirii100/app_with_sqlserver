@@ -49,3 +49,17 @@ class LoanAdmin(admin.ModelAdmin):
     list_filter = (
         'status',
     )
+
+    actions = ['approve_loans', 'reject_loans', 'cancel_loans']
+
+    @admin.action(description='Approve selected loans')
+    def approve_loans(self, request, queryset):
+        queryset.update(status='approved')
+
+    @admin.action(description='Reject selected loans')
+    def reject_loans(self, request, queryset):
+        queryset.update(status='rejected')
+
+    @admin.action(description='Cancel selected loans')
+    def cancel_loans(self, request, queryset):
+        queryset.update(status='cancelled')

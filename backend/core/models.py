@@ -14,6 +14,7 @@ def generate_account_number():
 
 class User(AbstractUser):
     phone_number = models.CharField(max_length=20, unique=True)
+    full_name = models.CharField(max_length=255, null=True, blank=True)
     national_id = models.CharField(max_length=20, null=True, blank=True)
     county = models.CharField(max_length=100, null=True, blank=True)
     town = models.CharField(max_length=100, null=True, blank=True)
