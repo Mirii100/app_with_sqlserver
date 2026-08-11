@@ -1,0 +1,2824 @@
+// // // import 'dart:io';
+// // // import 'package:flutter/material.dart';
+// // // import 'package:image_picker/image_picker.dart';
+// // // import '../../theme/app_colors.dart';
+// // // import '../../widgets/alexia_icons.dart';
+// // // import '../../widgets/core_widgets.dart';
+// // // import '../../widgets/theme_toggle.dart';
+// // // import '../../services/backend_auth_service.dart';
+// // // import '../../services/backend_api_service.dart';
+// // // import '../../utils/connectivity_util.dart';
+// // // import '../../screens/states/no_internet_screen.dart';
+// // // import 'biometric_otp_screen.dart';
+// // // import 'login_screen.dart';
+
+// // // class SignUpScreen extends StatefulWidget {
+// // //   const SignUpScreen({super.key});
+
+// // //   @override
+// // //   State<SignUpScreen> createState() => _SignUpScreenState();
+// // // }
+
+// // // class _SignUpScreenState extends State<SignUpScreen> {
+// // //   final _formKey = GlobalKey<FormState>();
+// // //   int _currentStep = 0;
+// // //   bool _isLoading = false;
+// // //   final ImagePicker _picker = ImagePicker();
+
+// // //   File? _idPhoto;
+// // //   File? _selfie;
+
+// // //   final _fullNameController = TextEditingController();
+// // //   final _nationalIdController = TextEditingController();
+// // //   final _phoneController = TextEditingController();
+// // //   final _emailController = TextEditingController();
+// // //   final _passwordController = TextEditingController();
+// // //   final _confirmPasswordController = TextEditingController();
+// // //   final _countyController = TextEditingController();
+// // //   final _townController = TextEditingController();
+// // //   final _postalCodeController = TextEditingController();
+// // //   final _employmentTypeController = TextEditingController();
+// // //   final _monthlyIncomeController = TextEditingController();
+
+// // //   final List<String> _counties = [
+// // //     'Mombasa', 'Kwale', 'Kilifi', 'Tana River', 'Lamu', 'Taita-Taveta', 'Garissa', 'Wajir', 'Mandera', 'Marsabit', 
+// // //     'Isiolo', 'Meru', 'Tharaka-Nithi', 'Embu', 'Kitui', 'Machakos', 'Makueni', 'Nyandarua', 'Nyeri', 'Kirinyaga', 
+// // //     'Murang\'a', 'Kiambu', 'Turkana', 'West Pokot', 'Samburu', 'Trans-Nzoia', 'Uasin Gishu', 'Elgeyo-Marakwet', 'Nandi', 'Baringo', 
+// // //     'Laikipia', 'Nakuru', 'Narok', 'Kajiado', 'Kericho', 'Bomet', 'Kakamega', 'Vihiga', 'Bungoma', 'Busia', 
+// // //     'Siaya', 'Kisumu', 'Homa Bay', 'Migori', 'Kisii', 'Nyamira', 'Nairobi'
+// // //   ];
+
+// // //   final List<String> _employmentTypes = ['Employed', 'Unemployed', 'Self employed', 'Student', 'Other'];
+
+// // //   final BackendAuthService _authService = BackendAuthService();
+
+// // //   final List<SignUpStep> _steps = [
+// // //     SignUpStep(
+// // //       title: 'Personal details',
+// // //       fields: [
+// // //         {'label': 'Full name', 'placeholder': 'As on your ID'},
+// // //         {'label': 'National ID / Passport', 'placeholder': 'e.g. 30112233'},
+// // //         {'label': 'Phone number', 'placeholder': '+254 7 __ ___ ___'},
+// // //         {'label': 'Email', 'placeholder': 'user@example.com'},
+// // //         {'label': 'Password', 'placeholder': 'Create a password'},
+// // //         {'label': 'Confirm password', 'placeholder': 'Confirm your password'},
+// // //       ],
+// // //       hasUploads: true,
+// // //     ),
+// // //     SignUpStep(
+// // //       title: 'Address',
+// // //       fields: [
+// // //         {'label': 'County', 'placeholder': 'Select county'},
+// // //         {'label': 'Town / City', 'placeholder': 'e.g. Nairobi'},
+// // //         {'label': 'Postal code', 'placeholder': 'e.g. 00100'},
+// // //       ],
+// // //       hasUploads: false,
+// // //     ),
+// // //     SignUpStep(
+// // //       title: 'Verification',
+// // //       fields: [
+// // //         {'label': 'Employment type', 'placeholder': 'e.g. Employed'},
+// // //         {'label': 'Monthly income', 'placeholder': 'KSh 0.00'},
+// // //       ],
+// // //       hasUploads: false,
+// // //     ),
+// // //   ];
+
+// // //   final Map<String, TextEditingController> _controllers = {};
+
+// // //   Future<void> _pickImage(bool isSelfie) async {
+// // //     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.camera);
+// // //     if (pickedFile != null) {
+// // //       setState(() {
+// // //         if (isSelfie) {
+// // //           _selfie = File(pickedFile.path);
+// // //         } else {
+// // //           _idPhoto = File(pickedFile.path);
+// // //         }
+// // //       });
+// // //     }
+// // //   }
+
+// // //   @override
+// // //   void initState() {
+// // //     super.initState();
+// // //     _controllers['Full name'] = _fullNameController;
+// // //     _controllers['National ID / Passport'] = _nationalIdController;
+// // //     _controllers['Phone number'] = _phoneController;
+// // //     _controllers['Email'] = _emailController;
+// // //     _controllers['Password'] = _passwordController;
+// // //     _controllers['Confirm password'] = _confirmPasswordController;
+// // //     _controllers['County'] = _countyController;
+// // //     _controllers['Town / City'] = _townController;
+// // //     _controllers['Postal code'] = _postalCodeController;
+// // //     _controllers['Employment type'] = _employmentTypeController;
+// // //     _controllers['Monthly income'] = _monthlyIncomeController;
+// // //   }
+
+// // //   @override
+// // //   void dispose() {
+// // //     _fullNameController.dispose();
+// // //     _nationalIdController.dispose();
+// // //     _phoneController.dispose();
+// // //     _emailController.dispose();
+// // //     _passwordController.dispose();
+// // //     _confirmPasswordController.dispose();
+// // //     _countyController.dispose();
+// // //     _townController.dispose();
+// // //     _postalCodeController.dispose();
+// // //     _employmentTypeController.dispose();
+// // //     _monthlyIncomeController.dispose();
+// // //     super.dispose();
+// // //   }
+
+// // //   @override
+// // //   Widget build(BuildContext context) {
+// // //     final isDark = Theme.of(context).brightness == Brightness.dark;
+// // //     final step = _steps[_currentStep];
+
+// // //     return Scaffold(
+// // //       body: Column(
+// // //         children: [
+// // //           AlexiaStatusBar(isDark: isDark),
+// // //           Padding(
+// // //             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+// // //             child: Row(
+// // //               mainAxisAlignment: MainAxisAlignment.end,
+// // //               children: [
+// // //                 ThemeToggle(isDark: isDark),
+// // //               ],
+// // //             ),
+// // //           ),
+// // //           Row(
+// // //             children: [
+// // //               IconButton(
+// // //                 icon: Icon(
+// // //                   Icons.arrow_back_ios,
+// // //                   size: 20,
+// // //                   color: isDark ? AppColors.darkInk : AppColors.ink,
+// // //                 ),
+// // //                 onPressed: () => Navigator.pop(context),
+// // //               ),
+// // //               Text(
+// // //                 'Create account',
+// // //                 style: TextStyle(
+// // //                   fontFamily: 'Fraunces',
+// // //                   fontSize: 17,
+// // //                   fontWeight: FontWeight.w600,
+// // //                   color: isDark ? AppColors.darkInk : AppColors.ink,
+// // //                 ),
+// // //               ),
+// // //               const Spacer(),
+// // //             ],
+// // //           ),
+// // //           Expanded(
+// // //             child: SingleChildScrollView(
+// // //               padding: const EdgeInsets.symmetric(horizontal: 20),
+// // //               child: Column(
+// // //                 crossAxisAlignment: CrossAxisAlignment.start,
+// // //                 children: [
+// // //                   _buildStepper(),
+// // //                   const SizedBox(height: 16),
+// // //                   Text(
+// // //                     'Step ${_currentStep + 1} of ${_steps.length} · ${step.title}',
+// // //                     style: TextStyle(
+// // //                       fontSize: 11.5,
+// // //                       fontWeight: FontWeight.w600,
+// // //                       color: isDark ? AppColors.darkMuted : AppColors.muted,
+// // //                     ),
+// // //                   ),
+// // //                   const SizedBox(height: 14),
+// // //                   Form(
+// // //                     key: _formKey,
+// // //                     child: Column(
+// // //                       children: step.fields.map((field) {
+// // //                         final label = field['label']!;
+// // //                         final controller = _controllers[label]!;
+// // //                         final isPassword = label == 'Password';
+// // //                         final isCounty = label == 'County';
+// // //                         final isEmploymentType = label == 'Employment type';
+
+// // //                         if (isCounty || isEmploymentType) {
+// // //                           return Padding(
+// // //                             padding: const EdgeInsets.only(bottom: 14),
+// // //                             child: Column(
+// // //                               crossAxisAlignment: CrossAxisAlignment.start,
+// // //                               children: [
+// // //                                 Text(
+// // //                                   label,
+// // //                                   style: TextStyle(
+// // //                                     fontSize: 11.5,
+// // //                                     fontWeight: FontWeight.w600,
+// // //                                     color: isDark
+// // //                                         ? AppColors.darkMuted
+// // //                                         : AppColors.muted,
+// // //                                   ),
+// // //                                 ),
+// // //                                 const SizedBox(height: 6),
+// // //                                 DropdownButtonFormField<String>(
+// // //                                   value: controller.text.isEmpty ? null : controller.text,
+// // //                                   hint: Text(
+// // //                                     field['placeholder']!,
+// // //                                     style: TextStyle(
+// // //                                       color: isDark
+// // //                                           ? AppColors.darkMuted
+// // //                                           : AppColors.muted,
+// // //                                     ),
+// // //                                   ),
+// // //                                   items: (isCounty ? _counties : _employmentTypes).map((e) {
+// // //                                     return DropdownMenuItem(
+// // //                                       value: e,
+// // //                                       child: Text(e),
+// // //                                     );
+// // //                                   }).toList(),
+// // //                                   onChanged: (val) => setState(() => controller.text = val!),
+// // //                                   validator: (val) => val == null ? 'Please select $label' : null,
+// // //                                   decoration: InputDecoration(
+// // //                                     contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+// // //                                   ),
+// // //                                 ),
+// // //                               ],
+// // //                             ),
+// // //                           );
+// // //                         }
+
+// // //                         return Padding(
+// // //                           padding: const EdgeInsets.only(bottom: 14),
+// // //                           child: Column(
+// // //                             crossAxisAlignment: CrossAxisAlignment.start,
+// // //                             children: [
+// // //                               Text(
+// // //                                 label,
+// // //                                 style: TextStyle(
+// // //                                   fontSize: 11.5,
+// // //                                   fontWeight: FontWeight.w600,
+// // //                                   color: isDark
+// // //                                       ? AppColors.darkMuted
+// // //                                       : AppColors.muted,
+// // //                                 ),
+// // //                               ),
+// // //                               const SizedBox(height: 6),
+// // //                               TextFormField(
+// // //                                 controller: controller,
+// // //                                 obscureText: isPassword,
+// // //                                 decoration: InputDecoration(
+// // //                                   hintText: field['placeholder'],
+// // //                                   hintStyle: TextStyle(
+// // //                                     color: isDark
+// // //                                         ? AppColors.darkMuted
+// // //                                         : AppColors.muted,
+// // //                                   ),
+// // //                                 ),
+// // //                                 validator: (value) {
+// // //                                   if (value == null || value.trim().isEmpty) {
+// // //                                     return 'Please enter $label';
+// // //                                   }
+// // //                                   if (isPassword && value.length < 6) {
+// // //                                     return 'Password must be at least 6 characters';
+// // //                                   }
+// // //                                   return null;
+// // //                                 },
+// // //                               ),
+// // //                             ],
+// // //                           ),
+// // //                         );
+// // //                       }).toList(),
+// // //                     ),
+// // //                   ),
+// // //                   if (step.hasUploads) ...[
+// // //                     _buildUploadBox(
+// // //                       icon: AlexiaIconType.doc,
+// // //                       title: _idPhoto == null ? 'Upload ID photo' : 'ID Photo Uploaded',
+// // //                       subtitle: _idPhoto == null ? 'Front & back, clear image' : 'Selected: ${_idPhoto!.path.split('/').last}',
+// // //                       isDark: isDark,
+// // //                       onTap: () => _pickImage(false),
+// // //                     ),
+// // //                     _buildUploadBox(
+// // //                       icon: AlexiaIconType.finger,
+// // //                       title: _selfie == null ? 'Take a selfie' : 'Selfie Taken',
+// // //                       subtitle: _selfie == null ? 'For liveness verification' : 'Selected: ${_selfie!.path.split('/').last}',
+// // //                       isDark: isDark,
+// // //                       onTap: () => _pickImage(true),
+// // //                     ),
+// // //                   ],
+// // //                 ],
+// // //               ),
+// // //             ),
+// // //           ),
+// // //           Container(
+// // //             padding: const EdgeInsets.all(20),
+// // //             decoration: BoxDecoration(
+// // //               color: isDark ? AppColors.darkSurface : AppColors.surface,
+// // //               border: Border(
+// // //                 top: BorderSide(
+// // //                   color: isDark ? AppColors.darkBorder : AppColors.border,
+// // //                 ),
+// // //               ),
+// // //             ),
+// // //             child: AlexiaButton(
+// // //               text: _isLoading
+// // //                   ? 'Creating account...'
+// // //                   : (_currentStep == _steps.length - 1
+// // //                       ? 'Create account'
+// // //                       : 'Continue'),
+// // //               onPressed: _isLoading
+// // //                   ? null
+// // //                   : () {
+// // //                       _handleContinue();
+// // //                     },
+// // //               isPrimary: true,
+// // //               isBlock: true,
+// // //             ),
+// // //           ),
+// // //         ],
+// // //       ),
+// // //     );
+// // //   }
+
+// // //   Future<void> _handleContinue() async {
+// // //     print("DEBUG: _handleContinue called");
+// // //     if (_isLoading) {
+// // //       print("DEBUG: _isLoading is true, returning");
+// // //       return;
+// // //     }
+
+// // //     final hasInternet = await ConnectivityUtil.ensureOnline();
+// // //     if (!hasInternet) {
+// // //       print("DEBUG: No internet");
+// // //       Navigator.of(context).push(
+// // //         MaterialPageRoute(builder: (context) => const NoInternetScreen()),
+// // //       );
+// // //       return;
+// // //     }
+
+// // //     final step = _steps[_currentStep];
+
+// // //     for (final field in step.fields) {
+// // //       final label = field['label']!;
+// // //       final controller = _controllers[label];
+// // //       final value = controller?.text.trim() ?? '';
+// // //       if (value.isEmpty) {
+// // //         print("DEBUG: Validation failed for $label");
+// // //         ScaffoldMessenger.of(context).showSnackBar(
+// // //           SnackBar(content: Text('Please enter $label')),
+// // //         );
+// // //         return;
+// // //       }
+// // //       // ... (rest of validation)
+// // //     }
+    
+// // //     print("DEBUG: Validation passed");
+// // //     if (step.hasUploads && (_idPhoto == null || _selfie == null)) {
+// // //       print("DEBUG: Missing uploads");
+// // //       ScaffoldMessenger.of(context).showSnackBar(
+// // //         const SnackBar(content: Text('Please upload ID photo and take a selfie')),
+// // //       );
+// // //       return;
+// // //     }
+
+// // //     if (_currentStep < _steps.length - 1) {
+// // //       print("DEBUG: Moving to next step");
+// // //       setState(() => _currentStep++);
+// // //     } else {
+// // //       print("DEBUG: Calling _createAccount");
+// // //       await _createAccount();
+// // //     }
+// // //   }
+
+// // //   Future<void> _createAccount() async {
+// // //     print("DEBUG: _createAccount called");
+// // //     setState(() => _isLoading = true);
+
+// // //     final hasInternet = await ConnectivityUtil.ensureOnline();
+// // //     if (!hasInternet) {
+// // //       if (mounted) {
+// // //         setState(() => _isLoading = false);
+// // //         Navigator.of(context).push(
+// // //           MaterialPageRoute(builder: (context) => const NoInternetScreen()),
+// // //         );
+// // //       }
+// // //       return;
+// // //     }
+
+// // //     final email = _emailController.text.trim();
+// // //     final password = _passwordController.text;
+// // //     final fullName = _fullNameController.text.trim();
+// // //     final phoneNumber = _phoneController.text.trim();
+// // //     final nationalId = _nationalIdController.text.trim();
+// // //     final county = _countyController.text.trim();
+// // //     final town = _townController.text.trim();
+// // //     final postalCode = _postalCodeController.text.trim();
+// // //     final employmentType = _employmentTypeController.text.trim();
+// // //     final monthlyIncome = _monthlyIncomeController.text.trim();
+
+// // //     try {
+// // //        final user = await _authService.signUpWithEmail(
+// // //          email: email,
+// // //          password: password,
+// // //          fullName: fullName,
+// // //          phoneNumber: phoneNumber,
+// // //          profilePhoto: _selfie,
+// // //          idPhoto: _idPhoto,
+// // //          selfiePhoto: _selfie,
+// // //        );
+
+// // //       if (user != null && mounted) {
+// // //         await _authService.saveUserData(
+// // //           userId: user.uid,
+// // //           fullName: fullName,
+// // //           phoneNumber: phoneNumber,
+// // //           nationalId: nationalId,
+// // //           email: email,
+// // //           county: county,
+// // //           town: town,
+// // //           postalCode: postalCode,
+// // //           employmentType: employmentType,
+// // //           monthlyIncome: monthlyIncome,
+// // //           balance: 0.0,
+// // //         );
+
+// // //         await _authService.createSavingsGoal(
+// // //           userId: user.uid,
+// // //           goalId: 'new_laptop',
+// // //           title: 'New laptop',
+// // //           purpose: 'Education & upskilling',
+// // //           targetAmount: 67000,
+// // //           savedAmount: 0,
+// // //           autoSaveAmount: 0,
+// // //           autoSaveEnabled: false,
+// // //         );
+
+// // //         final now = DateTime.now();
+// // //         final monthKey = '${now.year}-${now.month.toString().padLeft(2, '0')}';
+// // //         await _authService.saveBudgetData(
+// // //           userId: user.uid,
+// // //           monthKey: monthKey,
+// // //           budgetData: {
+// // //             'categories': {
+// // //               'Food': 14200,
+// // //               'Transport': 8600,
+// // //               'Airtime': 5100,
+// // //               'Other': 9800,
+// // //             },
+// // //             'budgetLimits': {
+// // //               'Food': 20000,
+// // //               'Transport': 10000,
+// // //               'Airtime': 4500,
+// // //               'Other': 15000,
+// // //             },
+// // //             'month': monthKey,
+// // //           },
+// // //         );
+
+// // //         await _authService.saveLoanProducts(user.uid, [
+// // //           {
+// // //             'id': 'quick_cash',
+// // //             'name': 'Quick Cash',
+// // //             'description': 'Up to KSh 35,000 · 30 days · 4.5% flat',
+// // //             'isBestMatch': true,
+// // //             'isOutline': false,
+// // //           },
+// // //           {
+// // //             'id': 'business_boost',
+// // //             'name': 'Business Boost',
+// // //             'description': 'Up to KSh 250,000 · 12 months · 2.1% p.m.',
+// // //             'isBestMatch': false,
+// // //             'isOutline': true,
+// // //           },
+// // //           {
+// // //             'id': 'asset_finance',
+// // //             'name': 'Asset Finance',
+// // //             'description': 'Up to KSh 1.2M · 36 months · Collateralised',
+// // //             'isBestMatch': false,
+// // //             'isOutline': true,
+// // //           },
+// // //         ]);
+
+// // //         await _authService.saveUserLoanLimit(
+// // //           userId: user.uid,
+// // //           limit: 35000,
+// // //           used: 0,
+// // //         );
+
+// // //         await _authService.saveBillers(user.uid, [
+// // //           {'id': 'kplc_prepaid', 'icon': 'bell', 'title': 'KPLC Prepaid', 'subtitle': 'Meter •• 88213'},
+// // //           {'id': 'riverbank_academy', 'icon': 'book', 'title': 'Riverbank Academy', 'subtitle': 'Term 3 fees'},
+// // //           {'id': 'ncba_bank', 'icon': 'bank', 'title': 'NCBA Bank', 'subtitle': 'Merchant payments'},
+// // //           {'id': 'safaricom', 'icon': 'card', 'title': 'Safaricom', 'subtitle': 'Airtime & data'},
+// // //           {'id': 'nairobi_water', 'icon': 'home', 'title': 'Nairobi Water', 'subtitle': 'Utility bill'},
+// // //           {'id': 'gojane_kg', 'icon': 'repeat', 'title': 'GoJane KG', 'subtitle': 'Subscription'},
+// // //         ]);
+
+// // //         await _authService.saveSecuritySettings(
+// // //           userId: user.uid,
+// // //           pin: null,
+// // //           biometricEnabled: false,
+// // //         );
+
+// // //         if (mounted) {
+// // //           ScaffoldMessenger.of(context).showSnackBar(
+// // //             const SnackBar(
+// // //               content: Text('Account created successfully. Please login.'),
+// // //               backgroundColor: Colors.green,
+// // //             ),
+// // //           );
+// // //           await Future.delayed(const Duration(milliseconds: 1500));
+// // //           if (!mounted) return;
+// // //           Navigator.of(context).pushAndRemoveUntil(
+// // //             MaterialPageRoute(
+// // //               builder: (context) => LoginScreen(),
+// // //             ),
+// // //             (route) => false,
+// // //           );
+// // //         }
+// // //       }
+// // //     } on BackendApiException catch (e) {
+// // //       String message = e.message;
+// // //       ScaffoldMessenger.of(context).showSnackBar(
+// // //         SnackBar(content: Text(message)),
+// // //       );
+// // //     } catch (e) {
+// // //       ScaffoldMessenger.of(context).showSnackBar(
+// // //         SnackBar(content: Text('Error: $e')),
+// // //       );
+// // //     } finally {
+// // //       if (mounted) {
+// // //         setState(() => _isLoading = false);
+// // //       }
+// // //     }
+// // //   }
+
+// // //   Widget _buildStepper() {
+// // //     final isDark = Theme.of(context).brightness == Brightness.dark;
+// // //     return Row(
+// // //       children: List.generate(_steps.length, (index) {
+// // //         final isActive = index == _currentStep;
+// // //         return Expanded(
+// // //           child: Row(
+// // //             children: [
+// // //               Container(
+// // //                 width: 22,
+// // //                 height: 22,
+// // //                 decoration: BoxDecoration(
+// // //                   color: isActive
+// // //                       ? (isDark ? AppColors.darkPrimary2 : AppColors.primary2)
+// // //                       : (isDark ? AppColors.darkBorder : AppColors.border),
+// // //                   shape: BoxShape.circle,
+// // //                 ),
+// // //                 child: Center(
+// // //                   child: Text(
+// // //                     '${index + 1}',
+// // //                     style: TextStyle(
+// // //                       fontSize: 11,
+// // //                       fontWeight: FontWeight.w700,
+// // //                       color: isActive
+// // //                           ? Colors.white
+// // //                           : (isDark ? AppColors.darkMuted : AppColors.muted),
+// // //                     ),
+// // //                   ),
+// // //                 ),
+// // //               ),
+// // //               if (index < _steps.length - 1)
+// // //                 Expanded(
+// // //                   child: Container(
+// // //                     height: 2,
+// // //                     color: isDark ? AppColors.darkBorder : AppColors.border,
+// // //                   ),
+// // //                 ),
+// // //             ],
+// // //           ),
+// // //         );
+// // //       }),
+// // //     );
+// // //   }
+
+// // //   Widget _buildUploadBox({
+// // //     required AlexiaIconType icon,
+// // //     required String title,
+// // //     required String subtitle,
+// // //     required bool isDark,
+// // //     required VoidCallback onTap,
+// // //   }) {
+// // //     return GestureDetector(
+// // //       onTap: onTap,
+// // //       child: Container(
+// // //         margin: const EdgeInsets.only(bottom: 12),
+// // //         padding: const EdgeInsets.all(14),
+// // //         decoration: BoxDecoration(
+// // //           border: Border.all(
+// // //             color: isDark ? AppColors.darkBorder : AppColors.border,
+// // //             width: 1,
+// // //           ),
+// // //           borderRadius: BorderRadius.circular(14),
+// // //         ),
+// // //         child: Row(
+// // //           children: [
+// // //             Container(
+// // //               width: 40,
+// // //               height: 40,
+// // //               decoration: BoxDecoration(
+// // //                 color: (isDark ? AppColors.darkPrimary2 : AppColors.primary2)
+// // //                     .withOpacity(0.1),
+// // //                 shape: BoxShape.circle,
+// // //               ),
+// // //               child: Center(
+// // //                 child: AlexiaIcon(
+// // //                   iconType: icon,
+// // //                   size: 20,
+// // //                   color: isDark ? AppColors.darkPrimary2 : AppColors.primary2,
+// // //                 ),
+// // //               ),
+// // //             ),
+// // //             const SizedBox(width: 12),
+// // //             Expanded(
+// // //               child: Column(
+// // //                 crossAxisAlignment: CrossAxisAlignment.start,
+// // //                 children: [
+// // //                   Text(
+// // //                     title,
+// // //                     style: TextStyle(
+// // //                       fontSize: 12.5,
+// // //                       fontWeight: FontWeight.w600,
+// // //                       color: isDark ? AppColors.darkInk : AppColors.ink,
+// // //                     ),
+// // //                   ),
+// // //                   Text(
+// // //                     subtitle,
+// // //                     style: TextStyle(
+// // //                       fontSize: 11,
+// // //                       color: isDark ? AppColors.darkMuted : AppColors.muted,
+// // //                     ),
+// // //                   ),
+// // //                 ],
+// // //               ),
+// // //             ),
+// // //           ],
+// // //         ),
+// // //       ),
+// // //     );
+// // //   }
+// // // }
+
+// // // class SignUpStep {
+// // //   final String title;
+// // //   final List<Map<String, String>> fields;
+// // //   final bool hasUploads;
+
+// // //   SignUpStep({
+// // //     required this.title,
+// // //     required this.fields,
+// // //     required this.hasUploads,
+// // //   });
+// // // }
+
+
+
+
+// // import 'dart:io';
+// // import 'package:flutter/material.dart';
+// // import 'package:image_picker/image_picker.dart';
+// // import '../../theme/app_colors.dart';
+// // import '../../widgets/alexia_icons.dart';
+// // import '../../widgets/core_widgets.dart';
+// // import '../../widgets/theme_toggle.dart';
+// // import '../../services/backend_auth_service.dart';
+// // import '../../services/backend_api_service.dart';
+// // import '../../utils/connectivity_util.dart';
+// // import '../../screens/states/no_internet_screen.dart';
+// // import 'biometric_otp_screen.dart';
+// // import 'login_screen.dart';
+
+// // class SignUpScreen extends StatefulWidget {
+// //   const SignUpScreen({super.key});
+
+// //   @override
+// //   State<SignUpScreen> createState() => _SignUpScreenState();
+// // }
+
+// // class _SignUpScreenState extends State<SignUpScreen> {
+// //   final _formKey = GlobalKey<FormState>();
+// //   int _currentStep = 0;
+// //   bool _isLoading = false;
+// //   final ImagePicker _picker = ImagePicker();
+
+// //   File? _idPhoto;
+// //   File? _selfie;
+
+// //   final _fullNameController = TextEditingController();
+// //   final _nationalIdController = TextEditingController();
+// //   final _phoneController = TextEditingController();
+// //   final _emailController = TextEditingController();
+// //   final _passwordController = TextEditingController();
+// //   final _confirmPasswordController = TextEditingController();
+// //   final _countyController = TextEditingController();
+// //   final _townController = TextEditingController();
+// //   final _postalCodeController = TextEditingController();
+// //   final _employmentTypeController = TextEditingController();
+// //   final _monthlyIncomeController = TextEditingController();
+
+// //   final List<String> _counties = [
+// //     'Mombasa', 'Kwale', 'Kilifi', 'Tana River', 'Lamu', 'Taita-Taveta', 'Garissa', 'Wajir', 'Mandera', 'Marsabit',
+// //     'Isiolo', 'Meru', 'Tharaka-Nithi', 'Embu', 'Kitui', 'Machakos', 'Makueni', 'Nyandarua', 'Nyeri', 'Kirinyaga',
+// //     'Murang\'a', 'Kiambu', 'Turkana', 'West Pokot', 'Samburu', 'Trans-Nzoia', 'Uasin Gishu', 'Elgeyo-Marakwet', 'Nandi', 'Baringo',
+// //     'Laikipia', 'Nakuru', 'Narok', 'Kajiado', 'Kericho', 'Bomet', 'Kakamega', 'Vihiga', 'Bungoma', 'Busia',
+// //     'Siaya', 'Kisumu', 'Homa Bay', 'Migori', 'Kisii', 'Nyamira', 'Nairobi'
+// //   ];
+
+// //   final List<String> _employmentTypes = ['Employed', 'Unemployed', 'Self employed', 'Student', 'Other'];
+
+// //   final BackendAuthService _authService = BackendAuthService();
+
+// //   final List<SignUpStep> _steps = [
+// //     SignUpStep(
+// //       title: 'Personal details',
+// //       fields: [
+// //         {'label': 'Full name', 'placeholder': 'As on your ID'},
+// //         {'label': 'National ID / Passport', 'placeholder': 'e.g. 30112233'},
+// //         {'label': 'Phone number', 'placeholder': '+254 7 __ ___ ___'},
+// //         {'label': 'Email', 'placeholder': 'user@example.com'},
+// //         {'label': 'Password', 'placeholder': 'Create a password'},
+// //         {'label': 'Confirm password', 'placeholder': 'Confirm your password'},
+// //       ],
+// //       hasUploads: true,
+// //     ),
+// //     SignUpStep(
+// //       title: 'Address',
+// //       fields: [
+// //         {'label': 'County', 'placeholder': 'Select county'},
+// //         {'label': 'Town / City', 'placeholder': 'e.g. Nairobi'},
+// //         {'label': 'Postal code', 'placeholder': 'e.g. 00100'},
+// //       ],
+// //       hasUploads: false,
+// //     ),
+// //     SignUpStep(
+// //       title: 'Verification',
+// //       fields: [
+// //         {'label': 'Employment type', 'placeholder': 'e.g. Employed'},
+// //         {'label': 'Monthly income', 'placeholder': 'KSh 0.00'},
+// //       ],
+// //       hasUploads: false,
+// //     ),
+// //   ];
+
+// //   final Map<String, TextEditingController> _controllers = {};
+
+// //   Future<void> _pickImage(bool isSelfie) async {
+// //     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.camera);
+// //     if (pickedFile != null) {
+// //       setState(() {
+// //         if (isSelfie) {
+// //           _selfie = File(pickedFile.path);
+// //         } else {
+// //           _idPhoto = File(pickedFile.path);
+// //         }
+// //       });
+// //     }
+// //   }
+
+// //   @override
+// //   void initState() {
+// //     super.initState();
+// //     _controllers['Full name'] = _fullNameController;
+// //     _controllers['National ID / Passport'] = _nationalIdController;
+// //     _controllers['Phone number'] = _phoneController;
+// //     _controllers['Email'] = _emailController;
+// //     _controllers['Password'] = _passwordController;
+// //     _controllers['Confirm password'] = _confirmPasswordController;
+// //     _controllers['County'] = _countyController;
+// //     _controllers['Town / City'] = _townController;
+// //     _controllers['Postal code'] = _postalCodeController;
+// //     _controllers['Employment type'] = _employmentTypeController;
+// //     _controllers['Monthly income'] = _monthlyIncomeController;
+// //   }
+
+// //   @override
+// //   void dispose() {
+// //     _fullNameController.dispose();
+// //     _nationalIdController.dispose();
+// //     _phoneController.dispose();
+// //     _emailController.dispose();
+// //     _passwordController.dispose();
+// //     _confirmPasswordController.dispose();
+// //     _countyController.dispose();
+// //     _townController.dispose();
+// //     _postalCodeController.dispose();
+// //     _employmentTypeController.dispose();
+// //     _monthlyIncomeController.dispose();
+// //     super.dispose();
+// //   }
+
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     final isDark = Theme.of(context).brightness == Brightness.dark;
+// //     final step = _steps[_currentStep];
+
+// //     return Scaffold(
+// //       body: Column(
+// //         children: [
+// //           AlexiaStatusBar(isDark: isDark),
+// //           Padding(
+// //             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+// //             child: Row(
+// //               mainAxisAlignment: MainAxisAlignment.end,
+// //               children: [
+// //                 ThemeToggle(isDark: isDark),
+// //               ],
+// //             ),
+// //           ),
+// //           Row(
+// //             children: [
+// //               IconButton(
+// //                 icon: Icon(
+// //                   Icons.arrow_back_ios,
+// //                   size: 20,
+// //                   color: isDark ? AppColors.darkInk : AppColors.ink,
+// //                 ),
+// //                 onPressed: () => Navigator.pop(context),
+// //               ),
+// //               Text(
+// //                 'Create account',
+// //                 style: TextStyle(
+// //                   fontFamily: 'Fraunces',
+// //                   fontSize: 17,
+// //                   fontWeight: FontWeight.w600,
+// //                   color: isDark ? AppColors.darkInk : AppColors.ink,
+// //                 ),
+// //               ),
+// //               const Spacer(),
+// //             ],
+// //           ),
+// //           Expanded(
+// //             child: SingleChildScrollView(
+// //               padding: const EdgeInsets.symmetric(horizontal: 20),
+// //               child: Column(
+// //                 crossAxisAlignment: CrossAxisAlignment.start,
+// //                 children: [
+// //                   _buildStepper(),
+// //                   const SizedBox(height: 16),
+// //                   Text(
+// //                     'Step ${_currentStep + 1} of ${_steps.length} · ${step.title}',
+// //                     style: TextStyle(
+// //                       fontSize: 11.5,
+// //                       fontWeight: FontWeight.w600,
+// //                       color: isDark ? AppColors.darkMuted : AppColors.muted,
+// //                     ),
+// //                   ),
+// //                   const SizedBox(height: 14),
+// //                   Form(
+// //                     key: _formKey,
+// //                     child: Column(
+// //                       children: step.fields.map((field) {
+// //                         final label = field['label']!;
+// //                         final controller = _controllers[label]!;
+// //                         final isPassword = label == 'Password';
+// //                         final isCounty = label == 'County';
+// //                         final isEmploymentType = label == 'Employment type';
+
+// //                         if (isCounty || isEmploymentType) {
+// //                           return Padding(
+// //                             padding: const EdgeInsets.only(bottom: 14),
+// //                             child: Column(
+// //                               crossAxisAlignment: CrossAxisAlignment.start,
+// //                               children: [
+// //                                 Text(
+// //                                   label,
+// //                                   style: TextStyle(
+// //                                     fontSize: 11.5,
+// //                                     fontWeight: FontWeight.w600,
+// //                                     color: isDark
+// //                                         ? AppColors.darkMuted
+// //                                         : AppColors.muted,
+// //                                   ),
+// //                                 ),
+// //                                 const SizedBox(height: 6),
+// //                                 DropdownButtonFormField<String>(
+// //                                   value: controller.text.isEmpty ? null : controller.text,
+// //                                   hint: Text(
+// //                                     field['placeholder']!,
+// //                                     style: TextStyle(
+// //                                       color: isDark
+// //                                           ? AppColors.darkMuted
+// //                                           : AppColors.muted,
+// //                                     ),
+// //                                   ),
+// //                                   items: (isCounty ? _counties : _employmentTypes).map((e) {
+// //                                     return DropdownMenuItem(
+// //                                       value: e,
+// //                                       child: Text(e),
+// //                                     );
+// //                                   }).toList(),
+// //                                   onChanged: (val) => setState(() => controller.text = val!),
+// //                                   validator: (val) => val == null ? 'Please select $label' : null,
+// //                                   decoration: InputDecoration(
+// //                                     contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+// //                                   ),
+// //                                 ),
+// //                               ],
+// //                             ),
+// //                           );
+// //                         }
+
+// //                         return Padding(
+// //                           padding: const EdgeInsets.only(bottom: 14),
+// //                           child: Column(
+// //                             crossAxisAlignment: CrossAxisAlignment.start,
+// //                             children: [
+// //                               Text(
+// //                                 label,
+// //                                 style: TextStyle(
+// //                                   fontSize: 11.5,
+// //                                   fontWeight: FontWeight.w600,
+// //                                   color: isDark
+// //                                       ? AppColors.darkMuted
+// //                                       : AppColors.muted,
+// //                                 ),
+// //                               ),
+// //                               const SizedBox(height: 6),
+// //                               TextFormField(
+// //                                 controller: controller,
+// //                                 obscureText: isPassword,
+// //                                 decoration: InputDecoration(
+// //                                   hintText: field['placeholder'],
+// //                                   hintStyle: TextStyle(
+// //                                     color: isDark
+// //                                         ? AppColors.darkMuted
+// //                                         : AppColors.muted,
+// //                                   ),
+// //                                 ),
+// //                                 validator: (value) {
+// //                                   if (value == null || value.trim().isEmpty) {
+// //                                     return 'Please enter $label';
+// //                                   }
+// //                                   if (isPassword && value.length < 6) {
+// //                                     return 'Password must be at least 6 characters';
+// //                                   }
+// //                                   return null;
+// //                                 },
+// //                               ),
+// //                             ],
+// //                           ),
+// //                         );
+// //                       }).toList(),
+// //                     ),
+// //                   ),
+// //                   if (step.hasUploads) ...[
+// //                     _buildUploadBox(
+// //                       icon: AlexiaIconType.doc,
+// //                       title: _idPhoto == null ? 'Upload ID photo' : 'ID Photo Uploaded',
+// //                       subtitle: _idPhoto == null ? 'Front & back, clear image' : 'Selected: ${_idPhoto!.path.split('/').last}',
+// //                       isDark: isDark,
+// //                       onTap: () => _pickImage(false),
+// //                     ),
+// //                     _buildUploadBox(
+// //                       icon: AlexiaIconType.finger,
+// //                       title: _selfie == null ? 'Take a selfie' : 'Selfie Taken',
+// //                       subtitle: _selfie == null ? 'For liveness verification' : 'Selected: ${_selfie!.path.split('/').last}',
+// //                       isDark: isDark,
+// //                       onTap: () => _pickImage(true),
+// //                     ),
+// //                   ],
+// //                 ],
+// //               ),
+// //             ),
+// //           ),
+// //           Container(
+// //             padding: const EdgeInsets.all(20),
+// //             decoration: BoxDecoration(
+// //               color: isDark ? AppColors.darkSurface : AppColors.surface,
+// //               border: Border(
+// //                 top: BorderSide(
+// //                   color: isDark ? AppColors.darkBorder : AppColors.border,
+// //                 ),
+// //               ),
+// //             ),
+// //             child: AlexiaButton(
+// //               text: _isLoading
+// //                   ? 'Creating account...'
+// //                   : (_currentStep == _steps.length - 1
+// //                       ? 'Create account'
+// //                       : 'Continue'),
+// //               onPressed: _isLoading
+// //                   ? null
+// //                   : () {
+// //                       _handleContinue();
+// //                     },
+// //               isPrimary: true,
+// //               isBlock: true,
+// //             ),
+// //           ),
+// //         ],
+// //       ),
+// //     );
+// //   }
+
+// //   Future<void> _handleContinue() async {
+// //     print("DEBUG: _handleContinue called");
+// //     if (_isLoading) {
+// //       print("DEBUG: _isLoading is true, returning");
+// //       return;
+// //     }
+
+// //     final hasInternet = await ConnectivityUtil.ensureOnline();
+// //     if (!hasInternet) {
+// //       print("DEBUG: No internet");
+// //       Navigator.of(context).push(
+// //         MaterialPageRoute(builder: (context) => const NoInternetScreen()),
+// //       );
+// //       return;
+// //     }
+
+// //     final step = _steps[_currentStep];
+
+// //     for (final field in step.fields) {
+// //       final label = field['label']!;
+// //       final controller = _controllers[label];
+// //       final value = controller?.text.trim() ?? '';
+// //       if (value.isEmpty) {
+// //         print("DEBUG: Validation failed for $label");
+// //         ScaffoldMessenger.of(context).showSnackBar(
+// //           SnackBar(content: Text('Please enter $label')),
+// //         );
+// //         return;
+// //       }
+// //       // ... (rest of validation)
+// //     }
+
+// //     print("DEBUG: Validation passed");
+// //     if (step.hasUploads && (_idPhoto == null || _selfie == null)) {
+// //       print("DEBUG: Missing uploads");
+// //       ScaffoldMessenger.of(context).showSnackBar(
+// //         const SnackBar(content: Text('Please upload ID photo and take a selfie')),
+// //       );
+// //       return;
+// //     }
+
+// //     if (_currentStep < _steps.length - 1) {
+// //       print("DEBUG: Moving to next step");
+// //       setState(() => _currentStep++);
+// //     } else {
+// //       print("DEBUG: Calling _createAccount");
+// //       await _createAccount();
+// //     }
+// //   }
+
+// //   Future<void> _createAccount() async {
+// //     print("DEBUG: _createAccount called");
+// //     setState(() => _isLoading = true);
+
+// //     final hasInternet = await ConnectivityUtil.ensureOnline();
+// //     if (!hasInternet) {
+// //       if (mounted) {
+// //         setState(() => _isLoading = false);
+// //         Navigator.of(context).push(
+// //           MaterialPageRoute(builder: (context) => const NoInternetScreen()),
+// //         );
+// //       }
+// //       return;
+// //     }
+
+// //     final email = _emailController.text.trim();
+// //     final password = _passwordController.text;
+// //     final fullName = _fullNameController.text.trim();
+// //     final phoneNumber = _phoneController.text.trim();
+// //     final nationalId = _nationalIdController.text.trim();
+// //     final county = _countyController.text.trim();
+// //     final town = _townController.text.trim();
+// //     final postalCode = _postalCodeController.text.trim();
+// //     final employmentType = _employmentTypeController.text.trim();
+// //     final monthlyIncome = _monthlyIncomeController.text.trim();
+
+// //     try {
+// //       final user = await _authService.signUpWithEmail(
+// //         email: email,
+// //         password: password,
+// //         fullName: fullName,
+// //         phoneNumber: phoneNumber,
+// //         profilePhoto: _selfie,
+// //         idPhoto: _idPhoto,
+// //         selfiePhoto: _selfie,
+// //       );
+
+// //       print("DEBUG: account created, user=$user");
+
+// //       if (user != null && mounted) {
+// //         await _authService.saveUserData(
+// //           userId: user.uid,
+// //           fullName: fullName,
+// //           phoneNumber: phoneNumber,
+// //           nationalId: nationalId,
+// //           email: email,
+// //           county: county,
+// //           town: town,
+// //           postalCode: postalCode,
+// //           employmentType: employmentType,
+// //           monthlyIncome: monthlyIncome,
+// //           balance: 0.0,
+// //         );
+
+// //         await _authService.createSavingsGoal(
+// //           userId: user.uid,
+// //           goalId: 'new_laptop',
+// //           title: 'New laptop',
+// //           purpose: 'Education & upskilling',
+// //           targetAmount: 67000,
+// //           savedAmount: 0,
+// //           autoSaveAmount: 0,
+// //           autoSaveEnabled: false,
+// //         );
+
+// //         final now = DateTime.now();
+// //         final monthKey = '${now.year}-${now.month.toString().padLeft(2, '0')}';
+// //         await _authService.saveBudgetData(
+// //           userId: user.uid,
+// //           monthKey: monthKey,
+// //           budgetData: {
+// //             'categories': {
+// //               'Food': 14200,
+// //               'Transport': 8600,
+// //               'Airtime': 5100,
+// //               'Other': 9800,
+// //             },
+// //             'budgetLimits': {
+// //               'Food': 20000,
+// //               'Transport': 10000,
+// //               'Airtime': 4500,
+// //               'Other': 15000,
+// //             },
+// //             'month': monthKey,
+// //           },
+// //         );
+
+// //         await _authService.saveLoanProducts(user.uid, [
+// //           {
+// //             'id': 'quick_cash',
+// //             'name': 'Quick Cash',
+// //             'description': 'Up to KSh 35,000 · 30 days · 4.5% flat',
+// //             'isBestMatch': true,
+// //             'isOutline': false,
+// //           },
+// //           {
+// //             'id': 'business_boost',
+// //             'name': 'Business Boost',
+// //             'description': 'Up to KSh 250,000 · 12 months · 2.1% p.m.',
+// //             'isBestMatch': false,
+// //             'isOutline': true,
+// //           },
+// //           {
+// //             'id': 'asset_finance',
+// //             'name': 'Asset Finance',
+// //             'description': 'Up to KSh 1.2M · 36 months · Collateralised',
+// //             'isBestMatch': false,
+// //             'isOutline': true,
+// //           },
+// //         ]);
+
+// //         await _authService.saveUserLoanLimit(
+// //           userId: user.uid,
+// //           limit: 35000,
+// //           used: 0,
+// //         );
+
+// //         await _authService.saveBillers(user.uid, [
+// //           {'id': 'kplc_prepaid', 'icon': 'bell', 'title': 'KPLC Prepaid', 'subtitle': 'Meter •• 88213'},
+// //           {'id': 'riverbank_academy', 'icon': 'book', 'title': 'Riverbank Academy', 'subtitle': 'Term 3 fees'},
+// //           {'id': 'ncba_bank', 'icon': 'bank', 'title': 'NCBA Bank', 'subtitle': 'Merchant payments'},
+// //           {'id': 'safaricom', 'icon': 'card', 'title': 'Safaricom', 'subtitle': 'Airtime & data'},
+// //           {'id': 'nairobi_water', 'icon': 'home', 'title': 'Nairobi Water', 'subtitle': 'Utility bill'},
+// //           {'id': 'gojane_kg', 'icon': 'repeat', 'title': 'GoJane KG', 'subtitle': 'Subscription'},
+// //         ]);
+
+// //         await _authService.saveSecuritySettings(
+// //           userId: user.uid,
+// //           pin: null,
+// //           biometricEnabled: false,
+// //         );
+
+// //         // Show success message, then redirect to Login screen.
+// //         if (mounted) {
+// //           ScaffoldMessenger.of(context).showSnackBar(
+// //             const SnackBar(
+// //               content: Text('Account created successfully! Please login.'),
+// //               backgroundColor: Colors.green,
+// //               duration: Duration(seconds: 2),
+// //             ),
+// //           );
+
+// //           await Future.delayed(const Duration(seconds: 2));
+
+// //           if (!mounted) return;
+
+// //           Navigator.of(context).pushAndRemoveUntil(
+// //             MaterialPageRoute(
+// //               builder: (context) => const LoginScreen(),
+// //             ),
+// //             (route) => false,
+// //           );
+// //         }
+// //       } else {
+// //         // signUpWithEmail returned null unexpectedly.
+// //         if (mounted) {
+// //           ScaffoldMessenger.of(context).showSnackBar(
+// //             const SnackBar(
+// //               content: Text('Account creation failed. Please try again.'),
+// //               backgroundColor: Colors.red,
+// //             ),
+// //           );
+// //         }
+// //       }
+// //     } on BackendApiException catch (e) {
+// //       if (mounted) {
+// //         ScaffoldMessenger.of(context).showSnackBar(
+// //           SnackBar(
+// //             content: Text(e.message),
+// //             backgroundColor: Colors.red,
+// //           ),
+// //         );
+// //       }
+// //     } catch (e) {
+// //       if (mounted) {
+// //         ScaffoldMessenger.of(context).showSnackBar(
+// //           SnackBar(
+// //             content: Text('Error: $e'),
+// //             backgroundColor: Colors.red,
+// //           ),
+// //         );
+// //       }
+// //     } finally {
+// //       if (mounted) {
+// //         setState(() => _isLoading = false);
+// //       }
+// //     }
+// //   }
+
+// //   Widget _buildStepper() {
+// //     final isDark = Theme.of(context).brightness == Brightness.dark;
+// //     return Row(
+// //       children: List.generate(_steps.length, (index) {
+// //         final isActive = index == _currentStep;
+// //         return Expanded(
+// //           child: Row(
+// //             children: [
+// //               Container(
+// //                 width: 22,
+// //                 height: 22,
+// //                 decoration: BoxDecoration(
+// //                   color: isActive
+// //                       ? (isDark ? AppColors.darkPrimary2 : AppColors.primary2)
+// //                       : (isDark ? AppColors.darkBorder : AppColors.border),
+// //                   shape: BoxShape.circle,
+// //                 ),
+// //                 child: Center(
+// //                   child: Text(
+// //                     '${index + 1}',
+// //                     style: TextStyle(
+// //                       fontSize: 11,
+// //                       fontWeight: FontWeight.w700,
+// //                       color: isActive
+// //                           ? Colors.white
+// //                           : (isDark ? AppColors.darkMuted : AppColors.muted),
+// //                     ),
+// //                   ),
+// //                 ),
+// //               ),
+// //               if (index < _steps.length - 1)
+// //                 Expanded(
+// //                   child: Container(
+// //                     height: 2,
+// //                     color: isDark ? AppColors.darkBorder : AppColors.border,
+// //                   ),
+// //                 ),
+// //             ],
+// //           ),
+// //         );
+// //       }),
+// //     );
+// //   }
+
+// //   Widget _buildUploadBox({
+// //     required AlexiaIconType icon,
+// //     required String title,
+// //     required String subtitle,
+// //     required bool isDark,
+// //     required VoidCallback onTap,
+// //   }) {
+// //     return GestureDetector(
+// //       onTap: onTap,
+// //       child: Container(
+// //         margin: const EdgeInsets.only(bottom: 12),
+// //         padding: const EdgeInsets.all(14),
+// //         decoration: BoxDecoration(
+// //           border: Border.all(
+// //             color: isDark ? AppColors.darkBorder : AppColors.border,
+// //             width: 1,
+// //           ),
+// //           borderRadius: BorderRadius.circular(14),
+// //         ),
+// //         child: Row(
+// //           children: [
+// //             Container(
+// //               width: 40,
+// //               height: 40,
+// //               decoration: BoxDecoration(
+// //                 color: (isDark ? AppColors.darkPrimary2 : AppColors.primary2)
+// //                     .withOpacity(0.1),
+// //                 shape: BoxShape.circle,
+// //               ),
+// //               child: Center(
+// //                 child: AlexiaIcon(
+// //                   iconType: icon,
+// //                   size: 20,
+// //                   color: isDark ? AppColors.darkPrimary2 : AppColors.primary2,
+// //                 ),
+// //               ),
+// //             ),
+// //             const SizedBox(width: 12),
+// //             Expanded(
+// //               child: Column(
+// //                 crossAxisAlignment: CrossAxisAlignment.start,
+// //                 children: [
+// //                   Text(
+// //                     title,
+// //                     style: TextStyle(
+// //                       fontSize: 12.5,
+// //                       fontWeight: FontWeight.w600,
+// //                       color: isDark ? AppColors.darkInk : AppColors.ink,
+// //                     ),
+// //                   ),
+// //                   Text(
+// //                     subtitle,
+// //                     style: TextStyle(
+// //                       fontSize: 11,
+// //                       color: isDark ? AppColors.darkMuted : AppColors.muted,
+// //                     ),
+// //                   ),
+// //                 ],
+// //               ),
+// //             ),
+// //           ],
+// //         ),
+// //       ),
+// //     );
+// //   }
+// // }
+
+// // class SignUpStep {
+// //   final String title;
+// //   final List<Map<String, String>> fields;
+// //   final bool hasUploads;
+
+// //   SignUpStep({
+// //     required this.title,
+// //     required this.fields,
+// //     required this.hasUploads,
+// //   });
+// // }
+
+// import 'dart:io';
+// import 'package:flutter/material.dart';
+// import 'package:image_picker/image_picker.dart';
+// import '../../theme/app_colors.dart';
+// import '../../widgets/alexia_icons.dart';
+// import '../../widgets/core_widgets.dart';
+// import '../../widgets/theme_toggle.dart';
+// import '../../services/backend_auth_service.dart';
+// import '../../services/backend_api_service.dart';
+// import '../../utils/connectivity_util.dart';
+// import '../../screens/states/no_internet_screen.dart';
+// import 'biometric_otp_screen.dart';
+// import 'login_screen.dart';
+
+// class SignUpScreen extends StatefulWidget {
+//   const SignUpScreen({super.key});
+
+//   @override
+//   State<SignUpScreen> createState() => _SignUpScreenState();
+// }
+
+// class _SignUpScreenState extends State<SignUpScreen> {
+//   final _formKey = GlobalKey<FormState>();
+//   int _currentStep = 0;
+//   bool _isLoading = false;
+//   final ImagePicker _picker = ImagePicker();
+
+//   File? _idPhoto;
+//   File? _selfie;
+
+//   final _fullNameController = TextEditingController();
+//   final _nationalIdController = TextEditingController();
+//   final _phoneController = TextEditingController();
+//   final _emailController = TextEditingController();
+//   final _passwordController = TextEditingController();
+//   final _confirmPasswordController = TextEditingController();
+//   final _countyController = TextEditingController();
+//   final _townController = TextEditingController();
+//   final _postalCodeController = TextEditingController();
+//   final _employmentTypeController = TextEditingController();
+//   final _monthlyIncomeController = TextEditingController();
+
+//   final List<String> _counties = [
+//     'Mombasa', 'Kwale', 'Kilifi', 'Tana River', 'Lamu', 'Taita-Taveta', 'Garissa', 'Wajir', 'Mandera', 'Marsabit',
+//     'Isiolo', 'Meru', 'Tharaka-Nithi', 'Embu', 'Kitui', 'Machakos', 'Makueni', 'Nyandarua', 'Nyeri', 'Kirinyaga',
+//     'Murang\'a', 'Kiambu', 'Turkana', 'West Pokot', 'Samburu', 'Trans-Nzoia', 'Uasin Gishu', 'Elgeyo-Marakwet', 'Nandi', 'Baringo',
+//     'Laikipia', 'Nakuru', 'Narok', 'Kajiado', 'Kericho', 'Bomet', 'Kakamega', 'Vihiga', 'Bungoma', 'Busia',
+//     'Siaya', 'Kisumu', 'Homa Bay', 'Migori', 'Kisii', 'Nyamira', 'Nairobi'
+//   ];
+
+//   final List<String> _employmentTypes = ['Employed', 'Unemployed', 'Self employed', 'Student', 'Other'];
+
+//   final BackendAuthService _authService = BackendAuthService();
+
+//   final List<SignUpStep> _steps = [
+//     SignUpStep(
+//       title: 'Personal details',
+//       fields: [
+//         {'label': 'Full name', 'placeholder': 'As on your ID'},
+//         {'label': 'National ID / Passport', 'placeholder': 'e.g. 30112233'},
+//         {'label': 'Phone number', 'placeholder': '+254 7 __ ___ ___'},
+//         {'label': 'Email', 'placeholder': 'user@example.com'},
+//         {'label': 'Password', 'placeholder': 'Create a password'},
+//         {'label': 'Confirm password', 'placeholder': 'Confirm your password'},
+//       ],
+//       hasUploads: true,
+//     ),
+//     SignUpStep(
+//       title: 'Address',
+//       fields: [
+//         {'label': 'County', 'placeholder': 'Select county'},
+//         {'label': 'Town / City', 'placeholder': 'e.g. Nairobi'},
+//         {'label': 'Postal code', 'placeholder': 'e.g. 00100'},
+//       ],
+//       hasUploads: false,
+//     ),
+//     SignUpStep(
+//       title: 'Verification',
+//       fields: [
+//         {'label': 'Employment type', 'placeholder': 'e.g. Employed'},
+//         {'label': 'Monthly income', 'placeholder': 'KSh 0.00'},
+//       ],
+//       hasUploads: false,
+//     ),
+//   ];
+
+//   final Map<String, TextEditingController> _controllers = {};
+
+//   Future<void> _pickImage(bool isSelfie) async {
+//     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.camera);
+//     if (pickedFile != null) {
+//       setState(() {
+//         if (isSelfie) {
+//           _selfie = File(pickedFile.path);
+//         } else {
+//           _idPhoto = File(pickedFile.path);
+//         }
+//       });
+//     }
+//   }
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _controllers['Full name'] = _fullNameController;
+//     _controllers['National ID / Passport'] = _nationalIdController;
+//     _controllers['Phone number'] = _phoneController;
+//     _controllers['Email'] = _emailController;
+//     _controllers['Password'] = _passwordController;
+//     _controllers['Confirm password'] = _confirmPasswordController;
+//     _controllers['County'] = _countyController;
+//     _controllers['Town / City'] = _townController;
+//     _controllers['Postal code'] = _postalCodeController;
+//     _controllers['Employment type'] = _employmentTypeController;
+//     _controllers['Monthly income'] = _monthlyIncomeController;
+//   }
+
+//   @override
+//   void dispose() {
+//     _fullNameController.dispose();
+//     _nationalIdController.dispose();
+//     _phoneController.dispose();
+//     _emailController.dispose();
+//     _passwordController.dispose();
+//     _confirmPasswordController.dispose();
+//     _countyController.dispose();
+//     _townController.dispose();
+//     _postalCodeController.dispose();
+//     _employmentTypeController.dispose();
+//     _monthlyIncomeController.dispose();
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final isDark = Theme.of(context).brightness == Brightness.dark;
+//     final step = _steps[_currentStep];
+
+//     return Scaffold(
+//       body: Column(
+//         children: [
+//           AlexiaStatusBar(isDark: isDark),
+//           Padding(
+//             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+//             child: Row(
+//               mainAxisAlignment: MainAxisAlignment.end,
+//               children: [
+//                 ThemeToggle(isDark: isDark),
+//               ],
+//             ),
+//           ),
+//           Row(
+//             children: [
+//               IconButton(
+//                 icon: Icon(
+//                   Icons.arrow_back_ios,
+//                   size: 20,
+//                   color: isDark ? AppColors.darkInk : AppColors.ink,
+//                 ),
+//                 onPressed: () => Navigator.pop(context),
+//               ),
+//               Text(
+//                 'Create account',
+//                 style: TextStyle(
+//                   fontFamily: 'Fraunces',
+//                   fontSize: 17,
+//                   fontWeight: FontWeight.w600,
+//                   color: isDark ? AppColors.darkInk : AppColors.ink,
+//                 ),
+//               ),
+//               const Spacer(),
+//             ],
+//           ),
+//           Expanded(
+//             child: SingleChildScrollView(
+//               padding: const EdgeInsets.symmetric(horizontal: 20),
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   _buildStepper(),
+//                   const SizedBox(height: 16),
+//                   Text(
+//                     'Step ${_currentStep + 1} of ${_steps.length} · ${step.title}',
+//                     style: TextStyle(
+//                       fontSize: 11.5,
+//                       fontWeight: FontWeight.w600,
+//                       color: isDark ? AppColors.darkMuted : AppColors.muted,
+//                     ),
+//                   ),
+//                   const SizedBox(height: 14),
+//                   Form(
+//                     key: _formKey,
+//                     child: Column(
+//                       children: step.fields.map((field) {
+//                         final label = field['label']!;
+//                         final controller = _controllers[label]!;
+//                         final isPassword = label == 'Password';
+//                         final isCounty = label == 'County';
+//                         final isEmploymentType = label == 'Employment type';
+
+//                         if (isCounty || isEmploymentType) {
+//                           return Padding(
+//                             padding: const EdgeInsets.only(bottom: 14),
+//                             child: Column(
+//                               crossAxisAlignment: CrossAxisAlignment.start,
+//                               children: [
+//                                 Text(
+//                                   label,
+//                                   style: TextStyle(
+//                                     fontSize: 11.5,
+//                                     fontWeight: FontWeight.w600,
+//                                     color: isDark
+//                                         ? AppColors.darkMuted
+//                                         : AppColors.muted,
+//                                   ),
+//                                 ),
+//                                 const SizedBox(height: 6),
+//                                 DropdownButtonFormField<String>(
+//                                   value: controller.text.isEmpty ? null : controller.text,
+//                                   hint: Text(
+//                                     field['placeholder']!,
+//                                     style: TextStyle(
+//                                       color: isDark
+//                                           ? AppColors.darkMuted
+//                                           : AppColors.muted,
+//                                     ),
+//                                   ),
+//                                   items: (isCounty ? _counties : _employmentTypes).map((e) {
+//                                     return DropdownMenuItem(
+//                                       value: e,
+//                                       child: Text(e),
+//                                     );
+//                                   }).toList(),
+//                                   onChanged: (val) => setState(() => controller.text = val!),
+//                                   validator: (val) => val == null ? 'Please select $label' : null,
+//                                   decoration: InputDecoration(
+//                                     contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                           );
+//                         }
+
+//                         return Padding(
+//                           padding: const EdgeInsets.only(bottom: 14),
+//                           child: Column(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
+//                             children: [
+//                               Text(
+//                                 label,
+//                                 style: TextStyle(
+//                                   fontSize: 11.5,
+//                                   fontWeight: FontWeight.w600,
+//                                   color: isDark
+//                                       ? AppColors.darkMuted
+//                                       : AppColors.muted,
+//                                 ),
+//                               ),
+//                               const SizedBox(height: 6),
+//                               TextFormField(
+//                                 controller: controller,
+//                                 obscureText: isPassword,
+//                                 decoration: InputDecoration(
+//                                   hintText: field['placeholder'],
+//                                   hintStyle: TextStyle(
+//                                     color: isDark
+//                                         ? AppColors.darkMuted
+//                                         : AppColors.muted,
+//                                   ),
+//                                 ),
+//                                 validator: (value) {
+//                                   if (value == null || value.trim().isEmpty) {
+//                                     return 'Please enter $label';
+//                                   }
+//                                   if (isPassword && value.length < 6) {
+//                                     return 'Password must be at least 6 characters';
+//                                   }
+//                                   return null;
+//                                 },
+//                               ),
+//                             ],
+//                           ),
+//                         );
+//                       }).toList(),
+//                     ),
+//                   ),
+//                   if (step.hasUploads) ...[
+//                     _buildUploadBox(
+//                       icon: AlexiaIconType.doc,
+//                       title: _idPhoto == null ? 'Upload ID photo' : 'ID Photo Uploaded',
+//                       subtitle: _idPhoto == null ? 'Front & back, clear image' : 'Selected: ${_idPhoto!.path.split('/').last}',
+//                       isDark: isDark,
+//                       onTap: () => _pickImage(false),
+//                     ),
+//                     _buildUploadBox(
+//                       icon: AlexiaIconType.finger,
+//                       title: _selfie == null ? 'Take a selfie' : 'Selfie Taken',
+//                       subtitle: _selfie == null ? 'For liveness verification' : 'Selected: ${_selfie!.path.split('/').last}',
+//                       isDark: isDark,
+//                       onTap: () => _pickImage(true),
+//                     ),
+//                   ],
+//                 ],
+//               ),
+//             ),
+//           ),
+//           Container(
+//             padding: const EdgeInsets.all(20),
+//             decoration: BoxDecoration(
+//               color: isDark ? AppColors.darkSurface : AppColors.surface,
+//               border: Border(
+//                 top: BorderSide(
+//                   color: isDark ? AppColors.darkBorder : AppColors.border,
+//                 ),
+//               ),
+//             ),
+//             child: AlexiaButton(
+//               text: _isLoading
+//                   ? 'Creating account...'
+//                   : (_currentStep == _steps.length - 1
+//                       ? 'Create account'
+//                       : 'Continue'),
+//               onPressed: _isLoading
+//                   ? null
+//                   : () {
+//                       _handleContinue();
+//                     },
+//               isPrimary: true,
+//               isBlock: true,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Future<void> _handleContinue() async {
+//     print("DEBUG: _handleContinue called");
+//     if (_isLoading) {
+//       print("DEBUG: _isLoading is true, returning");
+//       return;
+//     }
+
+//     final hasInternet = await ConnectivityUtil.ensureOnline();
+//     if (!hasInternet) {
+//       print("DEBUG: No internet");
+//       Navigator.of(context).push(
+//         MaterialPageRoute(builder: (context) => const NoInternetScreen()),
+//       );
+//       return;
+//     }
+
+//     final step = _steps[_currentStep];
+
+//     for (final field in step.fields) {
+//       final label = field['label']!;
+//       final controller = _controllers[label];
+//       final value = controller?.text.trim() ?? '';
+//       if (value.isEmpty) {
+//         print("DEBUG: Validation failed for $label");
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text('Please enter $label')),
+//         );
+//         return;
+//       }
+//       // ... (rest of validation)
+//     }
+
+//     print("DEBUG: Validation passed");
+//     if (step.hasUploads && (_idPhoto == null || _selfie == null)) {
+//       print("DEBUG: Missing uploads");
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text('Please upload ID photo and take a selfie')),
+//       );
+//       return;
+//     }
+
+//     if (_currentStep < _steps.length - 1) {
+//       print("DEBUG: Moving to next step");
+//       setState(() => _currentStep++);
+//     } else {
+//       print("DEBUG: Calling _createAccount");
+//       await _createAccount();
+//     }
+//   }
+
+//   Future<void> _createAccount() async {
+//     print("DEBUG: _createAccount called");
+//     setState(() => _isLoading = true);
+
+//     final hasInternet = await ConnectivityUtil.ensureOnline();
+//     if (!hasInternet) {
+//       if (mounted) {
+//         setState(() => _isLoading = false);
+//         Navigator.of(context).push(
+//           MaterialPageRoute(builder: (context) => const NoInternetScreen()),
+//         );
+//       }
+//       return;
+//     }
+
+//     final email = _emailController.text.trim();
+//     final password = _passwordController.text;
+//     final fullName = _fullNameController.text.trim();
+//     final phoneNumber = _phoneController.text.trim();
+//     final nationalId = _nationalIdController.text.trim();
+//     final county = _countyController.text.trim();
+//     final town = _townController.text.trim();
+//     final postalCode = _postalCodeController.text.trim();
+//     final employmentType = _employmentTypeController.text.trim();
+//     final monthlyIncome = _monthlyIncomeController.text.trim();
+
+//     try {
+//       final user = await _authService.signUpWithEmail(
+//         email: email,
+//         password: password,
+//         fullName: fullName,
+//         phoneNumber: phoneNumber,
+//         profilePhoto: _selfie,
+//         idPhoto: _idPhoto,
+//         selfiePhoto: _selfie,
+//       );
+
+//       print("DEBUG: account created, user=$user");
+
+//       if (user != null && mounted) {
+//         // From this point on the account already exists in the backend
+//         // (the signup call above returned 201). Any failure in the
+//         // follow-up calls below should NOT block the success message or
+//         // redirect — otherwise the user sees an error, thinks nothing
+//         // happened, and taps "Create account" again, which then fails
+//         // with a duplicate-email error since the account already exists.
+//         await _safeCall(() => _authService.saveUserData(
+//           userId: user.uid,
+//           fullName: fullName,
+//           phoneNumber: phoneNumber,
+//           nationalId: nationalId,
+//           email: email,
+//           county: county,
+//           town: town,
+//           postalCode: postalCode,
+//           employmentType: employmentType,
+//           monthlyIncome: monthlyIncome,
+//           balance: 0.0,
+//         ), 'saveUserData');
+
+//         await _safeCall(() => _authService.createSavingsGoal(
+//           userId: user.uid,
+//           goalId: 'new_laptop',
+//           title: 'New laptop',
+//           purpose: 'Education & upskilling',
+//           targetAmount: 67000,
+//           savedAmount: 0,
+//           autoSaveAmount: 0,
+//           autoSaveEnabled: false,
+//         ), 'createSavingsGoal');
+
+//         final now = DateTime.now();
+//         final monthKey = '${now.year}-${now.month.toString().padLeft(2, '0')}';
+//         await _safeCall(() => _authService.saveBudgetData(
+//           userId: user.uid,
+//           monthKey: monthKey,
+//           budgetData: {
+//             'categories': {
+//               'Food': 14200,
+//               'Transport': 8600,
+//               'Airtime': 5100,
+//               'Other': 9800,
+//             },
+//             'budgetLimits': {
+//               'Food': 20000,
+//               'Transport': 10000,
+//               'Airtime': 4500,
+//               'Other': 15000,
+//             },
+//             'month': monthKey,
+//           },
+//         ), 'saveBudgetData');
+
+//         await _safeCall(() => _authService.saveLoanProducts(user.uid, [
+//           {
+//             'id': 'quick_cash',
+//             'name': 'Quick Cash',
+//             'description': 'Up to KSh 35,000 · 30 days · 4.5% flat',
+//             'isBestMatch': true,
+//             'isOutline': false,
+//           },
+//           {
+//             'id': 'business_boost',
+//             'name': 'Business Boost',
+//             'description': 'Up to KSh 250,000 · 12 months · 2.1% p.m.',
+//             'isBestMatch': false,
+//             'isOutline': true,
+//           },
+//           {
+//             'id': 'asset_finance',
+//             'name': 'Asset Finance',
+//             'description': 'Up to KSh 1.2M · 36 months · Collateralised',
+//             'isBestMatch': false,
+//             'isOutline': true,
+//           },
+//         ]), 'saveLoanProducts');
+
+//         await _safeCall(() => _authService.saveUserLoanLimit(
+//           userId: user.uid,
+//           limit: 35000,
+//           used: 0,
+//         ), 'saveUserLoanLimit');
+
+//         await _safeCall(() => _authService.saveBillers(user.uid, [
+//           {'id': 'kplc_prepaid', 'icon': 'bell', 'title': 'KPLC Prepaid', 'subtitle': 'Meter •• 88213'},
+//           {'id': 'riverbank_academy', 'icon': 'book', 'title': 'Riverbank Academy', 'subtitle': 'Term 3 fees'},
+//           {'id': 'ncba_bank', 'icon': 'bank', 'title': 'NCBA Bank', 'subtitle': 'Merchant payments'},
+//           {'id': 'safaricom', 'icon': 'card', 'title': 'Safaricom', 'subtitle': 'Airtime & data'},
+//           {'id': 'nairobi_water', 'icon': 'home', 'title': 'Nairobi Water', 'subtitle': 'Utility bill'},
+//           {'id': 'gojane_kg', 'icon': 'repeat', 'title': 'GoJane KG', 'subtitle': 'Subscription'},
+//         ]), 'saveBillers');
+
+//         await _safeCall(() => _authService.saveSecuritySettings(
+//           userId: user.uid,
+//           pin: null,
+//           biometricEnabled: false,
+//         ), 'saveSecuritySettings');
+
+//         // Show success message, then redirect to Login screen.
+//         // This runs regardless of whether any of the follow-up calls
+//         // above succeeded, because the account itself is already created.
+//         if (mounted) {
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             const SnackBar(
+//               content: Text('Account created successfully! Please login.'),
+//               backgroundColor: Colors.green,
+//               duration: Duration(seconds: 2),
+//             ),
+//           );
+
+//           await Future.delayed(const Duration(seconds: 2));
+
+//           if (!mounted) return;
+
+//           Navigator.of(context).pushAndRemoveUntil(
+//             MaterialPageRoute(
+//               builder: (context) => const LoginScreen(),
+//             ),
+//             (route) => false,
+//           );
+//         }
+//       } else {
+//         // signUpWithEmail returned null unexpectedly.
+//         if (mounted) {
+//           ScaffoldMessenger.of(context).showSnackBar(
+//             const SnackBar(
+//               content: Text('Account creation failed. Please try again.'),
+//               backgroundColor: Colors.red,
+//             ),
+//           );
+//         }
+//       }
+//     } on BackendApiException catch (e) {
+//       if (mounted) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(
+//             content: Text(e.message),
+//             backgroundColor: Colors.red,
+//           ),
+//         );
+//       }
+//     } catch (e) {
+//       if (mounted) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(
+//             content: Text('Error: $e'),
+//             backgroundColor: Colors.red,
+//           ),
+//         );
+//       }
+//     } finally {
+//       if (mounted) {
+//         setState(() => _isLoading = false);
+//       }
+//     }
+//   }
+
+//   /// Runs a follow-up backend call and swallows any failure so it can't
+//   /// block the account-creation success flow. The account already exists
+//   /// by the time these run; a failure here just means some non-critical
+//   /// setup data (goals, budget defaults, etc.) didn't save and can be
+//   /// retried later from within the app.
+//   Future<void> _safeCall(Future<void> Function() call, String label) async {
+//     try {
+//       await call();
+//     } catch (e) {
+//       debugPrint('DEBUG: $label failed (non-fatal): $e');
+//     }
+//   }
+
+//   Widget _buildStepper() {
+//     final isDark = Theme.of(context).brightness == Brightness.dark;
+//     return Row(
+//       children: List.generate(_steps.length, (index) {
+//         final isActive = index == _currentStep;
+//         return Expanded(
+//           child: Row(
+//             children: [
+//               Container(
+//                 width: 22,
+//                 height: 22,
+//                 decoration: BoxDecoration(
+//                   color: isActive
+//                       ? (isDark ? AppColors.darkPrimary2 : AppColors.primary2)
+//                       : (isDark ? AppColors.darkBorder : AppColors.border),
+//                   shape: BoxShape.circle,
+//                 ),
+//                 child: Center(
+//                   child: Text(
+//                     '${index + 1}',
+//                     style: TextStyle(
+//                       fontSize: 11,
+//                       fontWeight: FontWeight.w700,
+//                       color: isActive
+//                           ? Colors.white
+//                           : (isDark ? AppColors.darkMuted : AppColors.muted),
+//                     ),
+//                   ),
+//                 ),
+//               ),
+//               if (index < _steps.length - 1)
+//                 Expanded(
+//                   child: Container(
+//                     height: 2,
+//                     color: isDark ? AppColors.darkBorder : AppColors.border,
+//                   ),
+//                 ),
+//             ],
+//           ),
+//         );
+//       }),
+//     );
+//   }
+
+//   Widget _buildUploadBox({
+//     required AlexiaIconType icon,
+//     required String title,
+//     required String subtitle,
+//     required bool isDark,
+//     required VoidCallback onTap,
+//   }) {
+//     return GestureDetector(
+//       onTap: onTap,
+//       child: Container(
+//         margin: const EdgeInsets.only(bottom: 12),
+//         padding: const EdgeInsets.all(14),
+//         decoration: BoxDecoration(
+//           border: Border.all(
+//             color: isDark ? AppColors.darkBorder : AppColors.border,
+//             width: 1,
+//           ),
+//           borderRadius: BorderRadius.circular(14),
+//         ),
+//         child: Row(
+//           children: [
+//             Container(
+//               width: 40,
+//               height: 40,
+//               decoration: BoxDecoration(
+//                 color: (isDark ? AppColors.darkPrimary2 : AppColors.primary2)
+//                     .withOpacity(0.1),
+//                 shape: BoxShape.circle,
+//               ),
+//               child: Center(
+//                 child: AlexiaIcon(
+//                   iconType: icon,
+//                   size: 20,
+//                   color: isDark ? AppColors.darkPrimary2 : AppColors.primary2,
+//                 ),
+//               ),
+//             ),
+//             const SizedBox(width: 12),
+//             Expanded(
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   Text(
+//                     title,
+//                     style: TextStyle(
+//                       fontSize: 12.5,
+//                       fontWeight: FontWeight.w600,
+//                       color: isDark ? AppColors.darkInk : AppColors.ink,
+//                     ),
+//                   ),
+//                   Text(
+//                     subtitle,
+//                     style: TextStyle(
+//                       fontSize: 11,
+//                       color: isDark ? AppColors.darkMuted : AppColors.muted,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// class SignUpStep {
+//   final String title;
+//   final List<Map<String, String>> fields;
+//   final bool hasUploads;
+
+//   SignUpStep({
+//     required this.title,
+//     required this.fields,
+//     required this.hasUploads,
+//   });
+// }
+
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../theme/app_colors.dart';
+import '../../widgets/alexia_icons.dart';
+import '../../widgets/core_widgets.dart';
+import '../../widgets/theme_toggle.dart';
+import '../../services/backend_auth_service.dart';
+import '../../services/backend_api_service.dart';
+import '../../utils/connectivity_util.dart';
+import '../../screens/states/no_internet_screen.dart';
+import 'biometric_otp_screen.dart';
+import 'login_screen.dart';
+
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
+  @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
+  final _formKey = GlobalKey<FormState>();
+  int _currentStep = 0;
+  bool _isLoading = false;
+  final ImagePicker _picker = ImagePicker();
+
+  // NOTE: Switched from dart:io File to XFile. `File(picked.path)` throws
+  // "Unsupported operation: _Namespace" on Flutter Web because dart:io has
+  // no real filesystem there and pickedFile.path is a blob: URL, not a
+  // path. XFile works identically on web, Android, and iOS.
+  XFile? _idPhoto;
+  XFile? _selfie;
+
+  final _fullNameController = TextEditingController();
+  final _nationalIdController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _countyController = TextEditingController();
+  final _townController = TextEditingController();
+  final _postalCodeController = TextEditingController();
+  final _employmentTypeController = TextEditingController();
+  final _monthlyIncomeController = TextEditingController();
+
+  final List<String> _counties = [
+    'Mombasa', 'Kwale', 'Kilifi', 'Tana River', 'Lamu', 'Taita-Taveta', 'Garissa', 'Wajir', 'Mandera', 'Marsabit',
+    'Isiolo', 'Meru', 'Tharaka-Nithi', 'Embu', 'Kitui', 'Machakos', 'Makueni', 'Nyandarua', 'Nyeri', 'Kirinyaga',
+    'Murang\'a', 'Kiambu', 'Turkana', 'West Pokot', 'Samburu', 'Trans-Nzoia', 'Uasin Gishu', 'Elgeyo-Marakwet', 'Nandi', 'Baringo',
+    'Laikipia', 'Nakuru', 'Narok', 'Kajiado', 'Kericho', 'Bomet', 'Kakamega', 'Vihiga', 'Bungoma', 'Busia',
+    'Siaya', 'Kisumu', 'Homa Bay', 'Migori', 'Kisii', 'Nyamira', 'Nairobi'
+  ];
+
+  final List<String> _employmentTypes = ['Employed', 'Unemployed', 'Self employed', 'Student', 'Other'];
+
+  final BackendAuthService _authService = BackendAuthService();
+
+  final List<SignUpStep> _steps = [
+    SignUpStep(
+      title: 'Personal details',
+      fields: [
+        {'label': 'Full name', 'placeholder': 'As on your ID'},
+        {'label': 'National ID / Passport', 'placeholder': 'e.g. 30112233'},
+        {'label': 'Phone number', 'placeholder': '+254 7 __ ___ ___'},
+        {'label': 'Email', 'placeholder': 'user@example.com'},
+        {'label': 'Password', 'placeholder': 'Create a password'},
+        {'label': 'Confirm password', 'placeholder': 'Confirm your password'},
+      ],
+      hasUploads: true,
+    ),
+    SignUpStep(
+      title: 'Address',
+      fields: [
+        {'label': 'County', 'placeholder': 'Select county'},
+        {'label': 'Town / City', 'placeholder': 'e.g. Nairobi'},
+        {'label': 'Postal code', 'placeholder': 'e.g. 00100'},
+      ],
+      hasUploads: false,
+    ),
+    SignUpStep(
+      title: 'Verification',
+      fields: [
+        {'label': 'Employment type', 'placeholder': 'e.g. Employed'},
+        {'label': 'Monthly income', 'placeholder': 'KSh 0.00'},
+      ],
+      hasUploads: false,
+    ),
+  ];
+
+  final Map<String, TextEditingController> _controllers = {};
+
+  Future<void> _pickImage(bool isSelfie) async {
+    // On web, ImageSource.camera opens the browser's camera capture UI if
+    // available; if it's flaky in your environment, ImageSource.gallery is
+    // a good fallback to offer as well.
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        if (isSelfie) {
+          _selfie = pickedFile;
+        } else {
+          _idPhoto = pickedFile;
+        }
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers['Full name'] = _fullNameController;
+    _controllers['National ID / Passport'] = _nationalIdController;
+    _controllers['Phone number'] = _phoneController;
+    _controllers['Email'] = _emailController;
+    _controllers['Password'] = _passwordController;
+    _controllers['Confirm password'] = _confirmPasswordController;
+    _controllers['County'] = _countyController;
+    _controllers['Town / City'] = _townController;
+    _controllers['Postal code'] = _postalCodeController;
+    _controllers['Employment type'] = _employmentTypeController;
+    _controllers['Monthly income'] = _monthlyIncomeController;
+  }
+
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _nationalIdController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _countyController.dispose();
+    _townController.dispose();
+    _postalCodeController.dispose();
+    _employmentTypeController.dispose();
+    _monthlyIncomeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final step = _steps[_currentStep];
+
+    return Scaffold(
+      body: Column(
+        children: [
+          AlexiaStatusBar(isDark: isDark),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ThemeToggle(isDark: isDark),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.arrow_back_ios,
+                  size: 20,
+                  color: isDark ? AppColors.darkInk : AppColors.ink,
+                ),
+                onPressed: () => Navigator.pop(context),
+              ),
+              Text(
+                'Create account',
+                style: TextStyle(
+                  fontFamily: 'Fraunces',
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? AppColors.darkInk : AppColors.ink,
+                ),
+              ),
+              const Spacer(),
+            ],
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildStepper(),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Step ${_currentStep + 1} of ${_steps.length} · ${step.title}',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? AppColors.darkMuted : AppColors.muted,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: step.fields.map((field) {
+                        final label = field['label']!;
+                        final controller = _controllers[label]!;
+                        final isPassword = label == 'Password';
+                        final isCounty = label == 'County';
+                        final isEmploymentType = label == 'Employment type';
+
+                        if (isCounty || isEmploymentType) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  label,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark
+                                        ? AppColors.darkMuted
+                                        : AppColors.muted,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                DropdownButtonFormField<String>(
+                                  value: controller.text.isEmpty ? null : controller.text,
+                                  hint: Text(
+                                    field['placeholder']!,
+                                    style: TextStyle(
+                                      color: isDark
+                                          ? AppColors.darkMuted
+                                          : AppColors.muted,
+                                    ),
+                                  ),
+                                  items: (isCounty ? _counties : _employmentTypes).map((e) {
+                                    return DropdownMenuItem(
+                                      value: e,
+                                      child: Text(e),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) => setState(() => controller.text = val!),
+                                  validator: (val) => val == null ? 'Please select $label' : null,
+                                  decoration: InputDecoration(
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                label,
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark
+                                      ? AppColors.darkMuted
+                                      : AppColors.muted,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              TextFormField(
+                                controller: controller,
+                                obscureText: isPassword,
+                                decoration: InputDecoration(
+                                  hintText: field['placeholder'],
+                                  hintStyle: TextStyle(
+                                    color: isDark
+                                        ? AppColors.darkMuted
+                                        : AppColors.muted,
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Please enter $label';
+                                  }
+                                  if (isPassword && value.length < 6) {
+                                    return 'Password must be at least 6 characters';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  if (step.hasUploads) ...[
+                    _buildUploadBox(
+                      icon: AlexiaIconType.doc,
+                      title: _idPhoto == null ? 'Upload ID photo' : 'ID Photo Uploaded',
+                      subtitle: _idPhoto == null ? 'Front & back, clear image' : 'Selected: ${_idPhoto!.name}',
+                      isDark: isDark,
+                      onTap: () => _pickImage(false),
+                    ),
+                    _buildUploadBox(
+                      icon: AlexiaIconType.finger,
+                      title: _selfie == null ? 'Take a selfie' : 'Selfie Taken',
+                      subtitle: _selfie == null ? 'For liveness verification' : 'Selected: ${_selfie!.name}',
+                      isDark: isDark,
+                      onTap: () => _pickImage(true),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkSurface : AppColors.surface,
+              border: Border(
+                top: BorderSide(
+                  color: isDark ? AppColors.darkBorder : AppColors.border,
+                ),
+              ),
+            ),
+            child: AlexiaButton(
+              text: _isLoading
+                  ? 'Creating account...'
+                  : (_currentStep == _steps.length - 1
+                      ? 'Create account'
+                      : 'Continue'),
+              onPressed: _isLoading
+                  ? null
+                  : () {
+                      _handleContinue();
+                    },
+              isPrimary: true,
+              isBlock: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleContinue() async {
+    debugPrint("DEBUG: _handleContinue called");
+    if (_isLoading) {
+      debugPrint("DEBUG: _isLoading is true, returning");
+      return;
+    }
+
+    final hasInternet = await ConnectivityUtil.ensureOnline();
+    if (!hasInternet) {
+      debugPrint("DEBUG: No internet");
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const NoInternetScreen()),
+      );
+      return;
+    }
+
+    final step = _steps[_currentStep];
+
+    for (final field in step.fields) {
+      final label = field['label']!;
+      final controller = _controllers[label];
+      final value = controller?.text.trim() ?? '';
+      if (value.isEmpty) {
+        debugPrint("DEBUG: Validation failed for $label");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please enter $label')),
+        );
+        return;
+      }
+      // ... (rest of validation)
+    }
+
+    debugPrint("DEBUG: Validation passed");
+    if (step.hasUploads && (_idPhoto == null || _selfie == null)) {
+      debugPrint("DEBUG: Missing uploads");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please upload ID photo and take a selfie')),
+      );
+      return;
+    }
+
+    if (_currentStep < _steps.length - 1) {
+      debugPrint("DEBUG: Moving to next step");
+      setState(() => _currentStep++);
+    } else {
+      debugPrint("DEBUG: Calling _createAccount");
+      await _createAccount();
+    }
+  }
+
+  Future<void> _createAccount() async {
+    debugPrint("DEBUG: _createAccount called");
+    setState(() => _isLoading = true);
+
+    final hasInternet = await ConnectivityUtil.ensureOnline();
+    if (!hasInternet) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const NoInternetScreen()),
+        );
+      }
+      return;
+    }
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final fullName = _fullNameController.text.trim();
+    final phoneNumber = _phoneController.text.trim();
+    final nationalId = _nationalIdController.text.trim();
+    final county = _countyController.text.trim();
+    final town = _townController.text.trim();
+    final postalCode = _postalCodeController.text.trim();
+    final employmentType = _employmentTypeController.text.trim();
+    final monthlyIncome = _monthlyIncomeController.text.trim();
+
+    try {
+      // NOTE: signUpWithEmail's profilePhoto/idPhoto/selfiePhoto params must
+      // now be typed XFile? in BackendAuthService (they were File? before).
+      final user = await _authService.signUpWithEmail(
+        email: email,
+        password: password,
+        fullName: fullName,
+        phoneNumber: phoneNumber,
+        profilePhoto: _selfie,
+        idPhoto: _idPhoto,
+        selfiePhoto: _selfie,
+      );
+
+      debugPrint("DEBUG: account created, user=$user");
+
+      if (user != null && mounted) {
+        // From this point on the account already exists in the backend
+        // (the signup call above returned 201). Any failure in the
+        // follow-up calls below should NOT block the success message or
+        // redirect — otherwise the user sees an error, thinks nothing
+        // happened, and taps "Create account" again, which then fails
+        // with a duplicate-email error since the account already exists.
+        await _safeCall(() => _authService.saveUserData(
+          userId: user.uid,
+          fullName: fullName,
+          phoneNumber: phoneNumber,
+          nationalId: nationalId,
+          email: email,
+          county: county,
+          town: town,
+          postalCode: postalCode,
+          employmentType: employmentType,
+          monthlyIncome: monthlyIncome,
+          balance: 0.0,
+        ), 'saveUserData');
+
+        await _safeCall(() => _authService.createSavingsGoal(
+          userId: user.uid,
+          goalId: 'new_laptop',
+          title: 'New laptop',
+          purpose: 'Education & upskilling',
+          targetAmount: 67000,
+          savedAmount: 0,
+          autoSaveAmount: 0,
+          autoSaveEnabled: false,
+        ), 'createSavingsGoal');
+
+        final now = DateTime.now();
+        final monthKey = '${now.year}-${now.month.toString().padLeft(2, '0')}';
+        await _safeCall(() => _authService.saveBudgetData(
+          userId: user.uid,
+          monthKey: monthKey,
+          budgetData: {
+            'categories': {
+              'Food': 14200,
+              'Transport': 8600,
+              'Airtime': 5100,
+              'Other': 9800,
+            },
+            'budgetLimits': {
+              'Food': 20000,
+              'Transport': 10000,
+              'Airtime': 4500,
+              'Other': 15000,
+            },
+            'month': monthKey,
+          },
+        ), 'saveBudgetData');
+
+        await _safeCall(() => _authService.saveLoanProducts(user.uid, [
+          {
+            'id': 'quick_cash',
+            'name': 'Quick Cash',
+            'description': 'Up to KSh 35,000 · 30 days · 4.5% flat',
+            'isBestMatch': true,
+            'isOutline': false,
+          },
+          {
+            'id': 'business_boost',
+            'name': 'Business Boost',
+            'description': 'Up to KSh 250,000 · 12 months · 2.1% p.m.',
+            'isBestMatch': false,
+            'isOutline': true,
+          },
+          {
+            'id': 'asset_finance',
+            'name': 'Asset Finance',
+            'description': 'Up to KSh 1.2M · 36 months · Collateralised',
+            'isBestMatch': false,
+            'isOutline': true,
+          },
+        ]), 'saveLoanProducts');
+
+        await _safeCall(() => _authService.saveUserLoanLimit(
+          userId: user.uid,
+          limit: 35000,
+          used: 0,
+        ), 'saveUserLoanLimit');
+
+        await _safeCall(() => _authService.saveBillers(user.uid, [
+          {'id': 'kplc_prepaid', 'icon': 'bell', 'title': 'KPLC Prepaid', 'subtitle': 'Meter •• 88213'},
+          {'id': 'riverbank_academy', 'icon': 'book', 'title': 'Riverbank Academy', 'subtitle': 'Term 3 fees'},
+          {'id': 'ncba_bank', 'icon': 'bank', 'title': 'NCBA Bank', 'subtitle': 'Merchant payments'},
+          {'id': 'safaricom', 'icon': 'card', 'title': 'Safaricom', 'subtitle': 'Airtime & data'},
+          {'id': 'nairobi_water', 'icon': 'home', 'title': 'Nairobi Water', 'subtitle': 'Utility bill'},
+          {'id': 'gojane_kg', 'icon': 'repeat', 'title': 'GoJane KG', 'subtitle': 'Subscription'},
+        ]), 'saveBillers');
+
+        await _safeCall(() => _authService.saveSecuritySettings(
+          userId: user.uid,
+          pin: null,
+          biometricEnabled: false,
+        ), 'saveSecuritySettings');
+
+        // Show success message, then redirect to Login screen.
+        // This runs regardless of whether any of the follow-up calls
+        // above succeeded, because the account itself is already created.
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Account created successfully! Please login.'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          await Future.delayed(const Duration(seconds: 2));
+
+          if (!mounted) return;
+
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => const LoginScreen(),
+            ),
+            (route) => false,
+          );
+        }
+      } else {
+        // signUpWithEmail returned null unexpectedly.
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Account creation failed. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } on BackendApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  /// Runs a follow-up backend call and swallows any failure so it can't
+  /// block the account-creation success flow. The account already exists
+  /// by the time these run; a failure here just means some non-critical
+  /// setup data (goals, budget defaults, etc.) didn't save and can be
+  /// retried later from within the app.
+  Future<void> _safeCall(Future<void> Function() call, String label) async {
+    try {
+      await call();
+    } catch (e) {
+      debugPrint('DEBUG: $label failed (non-fatal): $e');
+    }
+  }
+
+  Widget _buildStepper() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Row(
+      children: List.generate(_steps.length, (index) {
+        final isActive = index == _currentStep;
+        return Expanded(
+          child: Row(
+            children: [
+              Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? (isDark ? AppColors.darkPrimary2 : AppColors.primary2)
+                      : (isDark ? AppColors.darkBorder : AppColors.border),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    '${index + 1}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: isActive
+                          ? Colors.white
+                          : (isDark ? AppColors.darkMuted : AppColors.muted),
+                    ),
+                  ),
+                ),
+              ),
+              if (index < _steps.length - 1)
+                Expanded(
+                  child: Container(
+                    height: 2,
+                    color: isDark ? AppColors.darkBorder : AppColors.border,
+                  ),
+                ),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildUploadBox({
+    required AlexiaIconType icon,
+    required String title,
+    required String subtitle,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isDark ? AppColors.darkBorder : AppColors.border,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: (isDark ? AppColors.darkPrimary2 : AppColors.primary2)
+                    .withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: AlexiaIcon(
+                  iconType: icon,
+                  size: 20,
+                  color: isDark ? AppColors.darkPrimary2 : AppColors.primary2,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? AppColors.darkInk : AppColors.ink,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark ? AppColors.darkMuted : AppColors.muted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SignUpStep {
+  final String title;
+  final List<Map<String, String>> fields;
+  final bool hasUploads;
+
+  SignUpStep({
+    required this.title,
+    required this.fields,
+    required this.hasUploads,
+  });
+}

@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+import json
 
 class SavingsGoal(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='savings_goals')
@@ -15,6 +16,48 @@ class SavingsGoal(models.Model):
 
     def __str__(self):
         return self.title
+
+class Budget(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='budgets')
+    month = models.CharField(max_length=20)
+    categories = models.TextField(default='{}', blank=True, help_text="JSON string of category spending")
+    budget_limits = models.TextField(default='{}', blank=True, help_text="JSON string of budget limits per category")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'month')
+
+    def get_categories(self):
+        try:
+            return json.loads(self.categories) if self.categories else {}
+        except (json.JSONDecodeError, TypeError):
+            return {}
+
+    def set_categories(self, value):
+        self.categories = json.dumps(value) if value else '{}'
+
+    def get_budget_limits(self):
+        try:
+            return json.loads(self.budget_limits) if self.budget_limits else {}
+        except (json.JSONDecodeError, TypeError):
+            return {}
+
+    def set_budget_limits(self, value):
+        self.budget_limits = json.dumps(value) if value else '{}'
+
+    def __str__(self):
+        return f"Budget for {self.user.username} - {self.month}"
+
+class UserLoanLimit(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='loan_limits')
+    limit = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
+    used = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Loan limit for {self.user.username}: {self.limit} (used: {self.used})"
 
 class Transaction(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='transactions')

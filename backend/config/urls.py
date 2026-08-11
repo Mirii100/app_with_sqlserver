@@ -9,9 +9,12 @@ from transactions.views import (
     TransactionViewSet,
     SavingsGoalViewSet,
     GoalTransactionViewSet,
+    BudgetViewSet,
+    UserLoanLimitViewSet,
 )
-from core.views import signup, login, UserDetailView
+from core.views import signup, login, UserDetailView, SecuritySettingsViewSet
 from loans.views import LoanViewSet, LoanProductViewSet
+from notifications.views import NotificationViewSet
 from django.contrib import admin
 router = routers.DefaultRouter()
 router.register(r"accounts", AccountViewSet)
@@ -21,8 +24,12 @@ router.register(r"chama-memberships", ChamaMembershipViewSet)
 router.register(r"transactions", TransactionViewSet)
 router.register(r"savings-goals", SavingsGoalViewSet)
 router.register(r"goal-transactions", GoalTransactionViewSet)
+router.register(r"budgets", BudgetViewSet)
+router.register(r"user-loan-limits", UserLoanLimitViewSet)
+router.register(r"security-settings", SecuritySettingsViewSet)
 router.register(r"loans", LoanViewSet)
 router.register(r"loan-products", LoanProductViewSet)
+router.register(r"notifications", NotificationViewSet)
 
 urlpatterns = [
     path("api/", include(router.urls)),

@@ -1,5 +1,16 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+import uuid
+import string
+import random
+
+def generate_account_number():
+    """Generate a unique 12-digit account number."""
+    while True:
+        number = ''.join(random.choices(string.digits, k=12))
+        # Ensure it starts with a non-zero digit
+        if number[0] != '0':
+            return number
 
 class User(AbstractUser):
     phone_number = models.CharField(max_length=20, unique=True)
@@ -12,11 +23,19 @@ class User(AbstractUser):
     balance = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
     loan_limit = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
     loan_used = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
+    
+    # Unique account number for the user
+    account_number = models.CharField(max_length=12, unique=True, blank=True, help_text="Unique account number generated on user creation")
 
     # New image fields
     profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
     id_photo = models.ImageField(upload_to='id_photos/', null=True, blank=True)
     selfie_photo = models.ImageField(upload_to='selfies/', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.account_number:
+            self.account_number = generate_account_number()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.username
