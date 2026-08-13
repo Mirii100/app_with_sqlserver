@@ -43,3 +43,21 @@ class Biller(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Beneficiary(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='beneficiaries')
+    name = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=20, help_text="Recipient phone number")
+    account_number = models.CharField(max_length=50, blank=True, default='')
+    bank_name = models.CharField(max_length=100, blank=True, default='', help_text="Bank name for bank beneficiaries")
+    is_bank = models.BooleanField(default=False, help_text="True for bank transfers, False for mobile money")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+        unique_together = ('user', 'phone_number')
+
+    def __str__(self):
+        return self.name

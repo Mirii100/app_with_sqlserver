@@ -22,6 +22,9 @@ class User(AbstractUser):
     employment_type = models.CharField(max_length=50, null=True, blank=True)
     monthly_income = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
     balance = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
+    loan_wallet_balance = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
+    chama_wallet_balance = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
+    goal_wallet_balance = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
     loan_limit = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
     loan_used = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
     

@@ -1,0 +1,15 @@
+<div class="content">
+  <h1>Our Services</h1>
+  
+  <div *ngIf="loading">
+    <app-skeleton-loader [height]="30" />
+    <app-skeleton-loader [height]="30" />
+    <app-skeleton-loader [height]="30" />
+  </div>
+  
+  <ul *ngIf="!loading && services.length > 0">
+    <li *ngFor="let service of services">{{ service.name || 'Service Item' }}</li>
+  </ul>
+  
+  <p *ngIf="!loading && services.length === 0">No services available at the moment.</p>
+</div>

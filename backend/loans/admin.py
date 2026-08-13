@@ -54,12 +54,18 @@ class LoanAdmin(admin.ModelAdmin):
 
     @admin.action(description='Approve selected loans')
     def approve_loans(self, request, queryset):
-        queryset.update(status='approved')
+        for loan in queryset:
+            loan.status = 'approved'
+            loan.save()
 
     @admin.action(description='Reject selected loans')
     def reject_loans(self, request, queryset):
-        queryset.update(status='rejected')
+        for loan in queryset:
+            loan.status = 'rejected'
+            loan.save()
 
     @admin.action(description='Cancel selected loans')
     def cancel_loans(self, request, queryset):
-        queryset.update(status='cancelled')
+        for loan in queryset:
+            loan.status = 'cancelled'
+            loan.save()

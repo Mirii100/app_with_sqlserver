@@ -8,6 +8,61 @@ from django.contrib.auth import authenticate
 
 from .serializers import UserSignupSerializer ,UserSerializer, SecuritySettingsSerializer
 from .models import User, SecuritySettings
+from django.db import transaction
+
+from decimal import Decimal
+from django.db import transaction
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def transfer_loan_to_main(request):
+    user = request.user
+    
+    if user.loan_wallet_balance <= 0:
+        return Response({'error': 'No funds in loan wallet'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    amount = user.loan_wallet_balance
+    
+    with transaction.atomic():
+        user.balance += amount
+        user.loan_wallet_balance = 0
+        user.save()
+        
+    return Response({'message': 'Transfer successful', 'new_balance': user.balance})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def transfer_to_chama_wallet(request):
+    user = request.user
+    amount = Decimal(request.data.get('amount', 0))
+    
+    if amount <= 0 or user.balance < amount:
+        return Response({'error': 'Insufficient funds or invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    with transaction.atomic():
+        user.balance -= amount
+        user.chama_wallet_balance += amount
+        user.save()
+        
+    return Response({'message': 'Transfer to Chama wallet successful', 'new_balance': user.balance, 'chama_wallet': user.chama_wallet_balance})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def transfer_to_goal_wallet(request):
+    user = request.user
+    amount = Decimal(request.data.get('amount', 0))
+    
+    if amount <= 0 or user.balance < amount:
+        return Response({'error': 'Insufficient funds or invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    with transaction.atomic():
+        user.balance -= amount
+        user.goal_wallet_balance += amount
+        user.save()
+        
+    return Response({'message': 'Transfer to Goal wallet successful', 'new_balance': user.balance, 'goal_wallet': user.goal_wallet_balance})
+
+
 from notifications.models import UserDevice, Notification
 
 def _attach_image(user, attr, fileobj):

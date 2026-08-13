@@ -1,0 +1,18 @@
+<div class="content">
+  <h1>Contact Us</h1>
+  <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+    <div>
+      <label for="name">Name:</label>
+      <input id="name" formControlName="name" />
+    </div>
+    <div>
+      <label for="email">Email:</label>
+      <input id="email" formControlName="email" />
+    </div>
+    <div>
+      <label for="message">Message:</label>
+      <textarea id="message" formControlName="message"></textarea>
+    </div>
+    <button type="submit" [disabled]="contactForm.invalid">Submit</button>
+  </form>
+</div>

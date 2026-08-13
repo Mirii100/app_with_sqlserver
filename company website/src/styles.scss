@@ -1,0 +1,54 @@
+/* Corporate Design System */
+:root {
+  --color-navy: #0a2540;
+  --color-slate: #425466;
+  --color-light-gray: #f6f9fc;
+  --color-white: #ffffff;
+  --color-accent: #00d4ff; /* Bright accent for CTAs */
+  
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 4rem;
+  
+  --border-radius: 4px;
+  --shadow-subtle: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--color-white);
+  color: var(--color-navy);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+h1, h2, h3 {
+  color: var(--color-navy);
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+a:hover {
+  opacity: 0.8;
+}
