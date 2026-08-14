@@ -22,6 +22,7 @@ class ChamaMembership(models.Model):
     chama = models.ForeignKey(Chama, on_delete=models.CASCADE, related_name='memberships')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='chama_memberships')
     role = models.CharField(max_length=20, default='member')
+    contributed_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0.0, help_text="Total amount this member has contributed to the chama pool")
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -1,0 +1,38 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<div class="container-fluid">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h1>Transaction Ledger</h1>
+        <form method="get" style="display:flex; gap:10px;">
+            <select name="type">
+                <option value="">All Types</option>
+                {% for t in types %}<option value="{{ t }}" {% if type_filter == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+            </select>
+            <select name="category">
+                <option value="">All Categories</option>
+                {% for c in categories %}<option value="{{ c }}" {% if cat_filter == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+            </select>
+            <button type="submit" class="button">Filter</button>
+            <a href="?format=pdf&type={{type_filter|default:''}}&category={{cat_filter|default:''}}" class="button">Export to PDF</a>
+        </form>
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr><th>Date</th><th>User</th><th>Type</th><th>Category</th><th>Amount</th><th>Fee</th><th>Gov Tax</th></tr>
+        </thead>
+        <tbody>
+            {% for r in ledger %}
+            <tr>
+                <td>{{ r.date|date:"Y-m-d H:i" }}</td>
+                <td>{{ r.user.username|default:"" }}</td>
+                <td>{{ r.type }}</td>
+                <td>{{ r.category }}</td>
+                <td>{{ r.amount }}</td>
+                <td>{{ r.broker_fee }}</td>
+                <td>{{ r.government_tax }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

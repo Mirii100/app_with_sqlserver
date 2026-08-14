@@ -56,15 +56,23 @@ class UserSerializer(serializers.ModelSerializer):
             'employment_type',
             'monthly_income',
             'balance',
+            'loan_wallet_balance',
+            'chama_wallet_balance',
+            'goal_wallet_balance',
             'loan_limit',
             'loan_used',
+            'points',
             'profile_photo',
             'id_photo',
             'selfie_photo',
             'biometric_enabled',
             'account_number',
         ]
-        read_only_fields = ['account_number', 'balance', 'loan_limit', 'loan_used']
+        read_only_fields = [
+            'account_number', 'balance',
+            'loan_wallet_balance', 'chama_wallet_balance', 'goal_wallet_balance',
+            'loan_limit', 'loan_used', 'points',
+        ]
 
     def get_biometric_enabled(self, obj):
         try:

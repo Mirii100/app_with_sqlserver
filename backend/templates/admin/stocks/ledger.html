@@ -1,0 +1,37 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<div class="container-fluid">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h1>Company Billing Ledger</h1>
+        <form method="get" style="display:flex; gap:10px;">
+            <select name="source">
+                <option value="">All Sources</option>
+                {% for s in sources %}<option value="{{ s }}" {% if source_filter == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+            </select>
+            <select name="trade_type">
+                <option value="">All Trades</option>
+                {% for t in trade_types %}<option value="{{ t }}" {% if trade_filter == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+            </select>
+            <button type="submit" class="button">Filter</button>
+            <a href="?format=pdf&source={{source_filter|default:''}}&trade_type={{trade_filter|default:''}}" class="button">Export to PDF</a>
+        </form>
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr><th>Date</th><th>Source</th><th>Trade</th><th>User</th><th>Amount</th><th>Account</th></tr>
+        </thead>
+        <tbody>
+            {% for r in ledger %}
+            <tr>
+                <td>{{ r.created_at|date:"Y-m-d H:i" }}</td>
+                <td>{{ r.source }}</td>
+                <td>{{ r.trade_type }}</td>
+                <td>{{ r.user.username|default:"" }}</td>
+                <td>{{ r.amount }}</td>
+                <td>{{ r.account_number }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

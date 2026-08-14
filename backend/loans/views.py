@@ -144,6 +144,8 @@ class LoanViewSet(viewsets.ModelViewSet):
                 type='withdrawal',
                 description=f'Loan repayment - Loan #{loan.id}',
                 date=timezone.now(),
+                loan=loan,
+                is_partial=remaining > 0,
             )
 
             if remaining <= 0:

@@ -1,0 +1,128 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block content %}
+<div id="content-main" style="padding: 20px; max-width: 1200px;">
+  <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% translate "Home" %}</a>
+    &rsaquo;
+    <a href="{% url 'admin:app_list' app_label='loans' %}">{% translate "Loans" %}</a>
+    &rsaquo;
+    <a href="{% url 'admin:loans_loan_changelist' %}">{% translate "Loans" %}</a>
+    &rsaquo; {% translate "Loan repayments" %}
+  </div>
+
+  <h1>Loan repayments</h1>
+
+  <div class="module" style="margin-bottom: 20px;">
+    <h2>Fully repaid loans ({{ fully_repaid|length }})</h2>
+    {% if fully_repaid %}
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th>Loan</th>
+          <th>User</th>
+          <th>Funded (KSh)</th>
+          <th>Repaid (KSh)</th>
+          <th>Outstanding (KSh)</th>
+          <th>Status</th>
+          <th>Completed at</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for loan in fully_repaid %}
+        <tr>
+          <td><a href="{% url 'admin:loans_loan_change' loan.pk %}">Loan #{{ loan.pk }}</a></td>
+          <td>{{ loan.user }}</td>
+          <td>{{ loan.funded|floatformat:2 }}</td>
+          <td>{{ loan.repaid_total|floatformat:2 }}</td>
+          <td>{{ loan.outstanding_amount|floatformat:2 }}</td>
+          <td>{{ loan.get_status_display }}</td>
+          <td>{{ loan.updated_at|date:"Y-m-d H:i" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>No fully repaid loans yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="module" style="margin-bottom: 20px;">
+    <h2>Partially repaid loans ({{ partially_repaid|length }})</h2>
+    {% if partially_repaid %}
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th>Loan</th>
+          <th>User</th>
+          <th>Funded (KSh)</th>
+          <th>Repaid so far (KSh)</th>
+          <th>Outstanding (KSh)</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for loan in partially_repaid %}
+        <tr>
+          <td><a href="{% url 'admin:loans_loan_change' loan.pk %}">Loan #{{ loan.pk }}</a></td>
+          <td>{{ loan.user }}</td>
+          <td>{{ loan.funded|floatformat:2 }}</td>
+          <td>{{ loan.repaid_total|floatformat:2 }}</td>
+          <td>{{ loan.outstanding_amount|floatformat:2 }}</td>
+          <td>{{ loan.get_status_display }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>No partially repaid loans.</p>
+    {% endif %}
+  </div>
+
+  <div class="module">
+    <h2>Latest repayment transactions ({{ repayment_transactions|length }})</h2>
+    {% if repayment_transactions %}
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>User</th>
+          <th>Loan</th>
+          <th>Type</th>
+          <th>Amount (KSh)</th>
+          <th>Date</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for txn in repayment_transactions %}
+        <tr>
+          <td>{{ txn.id }}</td>
+          <td>{{ txn.user }}</td>
+          <td>
+            {% if txn.loan %}
+            <a href="{% url 'admin:loans_loan_change' txn.loan.pk %}">Loan #{{ txn.loan.pk }}</a>
+            {% else %}
+            &mdash;
+            {% endif %}
+          </td>
+          <td>
+            {% if txn.is_partial %}
+            <span style="color: #8a6d3b; font-weight: 600;">Partial</span>
+            {% else %}
+            <span style="color: #155724; font-weight: 600;">Full</span>
+            {% endif %}
+          </td>
+          <td>{{ txn.amount|floatformat:2 }}</td>
+          <td>{{ txn.date|date:"Y-m-d H:i" }}</td>
+          <td>{{ txn.description }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>No loan repayment transactions yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

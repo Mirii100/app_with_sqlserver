@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid black; padding: 5px; font-size: 10px; }</style>
+</head>
+<body>
+    <h1>Company Billing Ledger</h1>
+    <table>
+        <thead><tr><th>Date</th><th>Source</th><th>Trade</th><th>User</th><th>Amount</th><th>Account</th></tr></thead>
+        <tbody>
+            {% for r in ledger %}
+            <tr>
+                <td>{{ r.created_at|date:"Y-m-d H:i" }}</td>
+                <td>{{ r.source }}</td>
+                <td>{{ r.trade_type }}</td>
+                <td>{{ r.user.username|default:"" }}</td>
+                <td>{{ r.amount }}</td>
+                <td>{{ r.account_number }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

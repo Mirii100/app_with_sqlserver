@@ -2,6 +2,16 @@ from django.contrib import admin
 from .models import Chama, ChamaMembership
 
 
+class ChamaMembershipInline(admin.TabularInline):
+    model = ChamaMembership
+    extra = 0
+    fk_name = 'chama'
+    readonly_fields = ('joined_at',)
+    raw_id_fields = ('user',)
+    verbose_name = 'Member'
+    verbose_name_plural = 'Members'
+
+
 @admin.register(Chama)
 class ChamaAdmin(admin.ModelAdmin):
     list_display = (
@@ -38,6 +48,7 @@ class ChamaAdmin(admin.ModelAdmin):
     list_select_related = ('admin',)
     ordering = ('-created_at',)
     list_per_page = 25
+    inlines = (ChamaMembershipInline,)
 
 
 @admin.register(ChamaMembership)
@@ -47,9 +58,11 @@ class ChamaMembershipAdmin(admin.ModelAdmin):
         'chama',
         'user',
         'role',
+        'contributed_amount',
         'joined_at',
     )
     list_filter = (
+        'chama',
         'role',
         'joined_at',
     )

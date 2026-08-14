@@ -27,6 +27,7 @@ class User(AbstractUser):
     goal_wallet_balance = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
     loan_limit = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
     loan_used = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
+    points = models.PositiveIntegerField(default=0, help_text="Loyalty points balance used to redeem rewards.")
     
     # Unique account number for the user
     account_number = models.CharField(max_length=12, unique=True, blank=True, help_text="Unique account number generated on user creation")
@@ -52,3 +53,34 @@ class SecuritySettings(models.Model):
 
     def __str__(self):
         return f"Security settings for {self.user.username}"
+
+
+class OtpCode(models.Model):
+    CHANNEL_CHOICES = [
+        ('email', 'Email'),
+        ('phone', 'Phone'),
+    ]
+    PURPOSE_CHOICES = [
+        ('login', 'Login'),
+        ('password_reset', 'Password Reset'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otp_codes')
+    code_hash = models.CharField(max_length=255)
+    channel = models.CharField(max_length=10, choices=CHANNEL_CHOICES)
+    purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES, default='login')
+    destination = models.CharField(max_length=255, blank=True, default='', help_text="Contact the code was sent to")
+    is_used = models.BooleanField(default=False)
+    attempts = models.PositiveIntegerField(default=0, help_text="Number of failed verification attempts")
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def is_valid_code(self, code):
+        from django.contrib.auth.hashers import check_password
+        return check_password(str(code), self.code_hash)
+
+    def __str__(self):
+        return f"OTP for {self.user.username} ({self.get_channel_display()})"

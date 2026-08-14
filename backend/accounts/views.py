@@ -34,7 +34,19 @@ class BeneficiaryViewSet(viewsets.ModelViewSet):
         return qs.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        user = self.request.user
+        account_number = (
+            serializer.validated_data.get('account_number')
+            or getattr(user, 'account_number', None)
+            or ''
+        )
+        serializer.save(user=user, account_number=account_number)
 
     def perform_update(self, serializer):
-        serializer.save(user=self.request.user)
+        user = self.request.user
+        account_number = (
+            serializer.validated_data.get('account_number')
+            or getattr(user, 'account_number', None)
+            or ''
+        )
+        serializer.save(user=user, account_number=account_number)

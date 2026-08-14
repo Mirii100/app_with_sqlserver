@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid black; padding: 5px; font-size: 10px; }</style>
+</head>
+<body>
+    <h1>Investment Ledger</h1>
+    <table>
+        <thead><tr><th>Date</th><th>User</th><th>Product</th><th>Amount</th><th>Maturity Val</th><th>Fee</th><th>Net Payout</th><th>Status</th></tr></thead>
+        <tbody>
+            {% for entry in ledger %}
+            <tr>
+                <td>{{ entry.date|date:"Y-m-d H:i" }}</td>
+                <td>{{ entry.user }}</td>
+                <td>{{ entry.product }}</td>
+                <td>{{ entry.amount }}</td>
+                <td>{{ entry.maturity_value }}</td>
+                <td>{{ entry.fee }}</td>
+                <td>{{ entry.payout }}</td>
+                <td>{{ entry.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

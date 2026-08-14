@@ -1,4 +1,6 @@
 from decimal import Decimal
+import json
+from datetime import timedelta
 from django.db import transaction
 from django.db.models import F, Sum, Count
 from django.utils import timezone
@@ -7,13 +9,47 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from accounts.models import Account
+from accounts.models import Account, Biller
+from accounts.models import generate_biller_account_number
 from chamas.models import Chama, ChamaMembership
 from loans.models import Loan
+from stocks.fees import compute_tiered_charges, record_charges, _money
 from .models import BillerCategory, Transaction, SavingsGoal, GoalTransaction, Budget, UserLoanLimit
 from .serializers import BillerCategorySerializer, TransactionSerializer, SavingsGoalSerializer, GoalTransactionSerializer, BudgetSerializer, UserLoanLimitSerializer
 
 User = get_user_model()
+
+SPENDING_BUCKETS = {
+    'cash': 'Cash withdrawal',
+    'withdraw': 'Cash withdrawal',
+    'transfer': 'Transfers',
+    'sent': 'Transfers',
+    'loan_repay': 'Loan repayment',
+    'repay': 'Loan repayment',
+    'savings_goal_fund': 'Savings',
+    'chama_contribution': 'Chama',
+}
+
+
+def _spending_bucket(category):
+    """Maps a transaction category to a friendly spending bucket."""
+    c = (category or '').lower()
+    food_keys = ('food', 'grocery', 'restaurant', 'supermarket', 'meal', 'eats', 'drink')
+    transport_keys = ('transport', 'fuel', 'petrol', 'matatu', 'uber', 'taxi', 'bus', 'fare', 'flight', 'train')
+    airtime_keys = ('airtime', 'data', 'internet', 'bundle', 'mobile', 'call', 'recharge')
+    for key in food_keys:
+        if key in c:
+            return 'Food'
+    for key in transport_keys:
+        if key in c:
+            return 'Transport'
+    for key in airtime_keys:
+        if key in c:
+            return 'Airtime'
+    for key, label in SPENDING_BUCKETS.items():
+        if key in c:
+            return label
+    return 'Other'
 
 class BillPaymentViewSet(viewsets.ViewSet):
     def create(self, request):
@@ -27,29 +63,79 @@ class BillPaymentViewSet(viewsets.ViewSet):
             return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            biller = Biller.objects.get(id=biller_id)
+        except (Biller.DoesNotExist, ValueError):
+            return Response({'error': 'Biller not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not biller.account_number:
+            biller.account_number = generate_biller_account_number()
+            biller.save(update_fields=['account_number'])
+
+        try:
             account = Account.objects.get(user_id=user_id)
         except Account.DoesNotExist:
             return Response({'error': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
 
         amount_value = Decimal(str(amount))
 
-        if account.balance < amount_value:
-            return Response({'error': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
+        if amount_value <= 0:
+            return Response({'error': 'Amount must be greater than zero'}, status=status.HTTP_400_BAD_REQUEST)
+
+        broker_fee, gov_tax, broker_rate, tax_rate = compute_tiered_charges(amount_value)
+        total_deduction = _money(amount_value + broker_fee + gov_tax)
+
+        if account.user.balance < total_deduction:
+            return Response(
+                {'error': f'Insufficient balance. KSh {_money(broker_fee + gov_tax)} in charges '
+                          'apply.',
+                 'broker_fee': str(broker_fee),
+                 'government_tax': str(gov_tax),
+                 'total_charges': str(_money(broker_fee + gov_tax))},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        biller_name = biller.title or biller.name or str(biller.id)
+        if not description:
+            description = f"Payment to {biller_name}"
+        if biller.account_number and 'Acc' not in description:
+            description = f"{description} • Acc {biller.account_number}"
 
         with transaction.atomic():
-            account.balance -= amount_value
-            account.save()
+            User.objects.filter(id=account.user.id).update(
+                balance=F('balance') - total_deduction
+            )
 
-            Transaction.objects.create(
+            biller.balance += amount_value
+            biller.save(update_fields=['balance'])
+
+            txn = Transaction.objects.create(
                 user=account.user,
-                amount=amount_value,
+                amount=total_deduction,
+                broker_fee=broker_fee,
+                government_tax=gov_tax,
                 category=category,
                 type='withdrawal',
-                description=description or f"Payment to {biller_id}",
+                description=f"{description} (KSh {amount_value} + charges KSh {_money(broker_fee + gov_tax)})",
                 date=timezone.now(),
             )
 
-        return Response({'status': 'success'}, status=status.HTTP_201_CREATED)
+            record_charges(
+                account.user, 'bill_payment', 'bill_payment', txn, amount_value,
+                account_number=account.user.account_number,
+                broker_fee=broker_fee, gov_tax=gov_tax,
+                broker_rate=broker_rate, tax_rate=tax_rate,
+            )
+
+        return Response({
+            'status': 'success',
+            'biller': biller_name,
+            'account_number': biller.account_number,
+            'biller_balance': str(biller.balance),
+            'amount': str(amount_value),
+            'broker_fee': str(broker_fee),
+            'government_tax': str(gov_tax),
+            'total_charges': str(_money(broker_fee + gov_tax)),
+        }, status=status.HTTP_201_CREATED)
 
 class BillerCategoryViewSet(viewsets.ModelViewSet):
     queryset = BillerCategory.objects.all()
@@ -83,11 +169,10 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
         amount_value = Decimal(str(amount))
 
-        reference = request.data.get('reference', '')
         description = request.data.get('description', 'Deposit')
 
         with transaction.atomic():
-            Transaction.objects.create(
+            txn = Transaction.objects.create(
                 user=user,
                 amount=amount_value,
                 category='deposit',
@@ -102,7 +187,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
         return Response({
             'status': 'success',
-            'reference': reference,
+            'reference': txn.reference,
             'new_balance': str(user.balance),
         }, status=status.HTTP_201_CREATED)
 
@@ -121,30 +206,51 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
         amount_value = Decimal(str(amount))
 
-        if user.balance < amount_value:
-            return Response({'error': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
+        broker_fee, gov_tax, broker_rate, tax_rate = compute_tiered_charges(amount_value)
+        total_deduction = _money(amount_value + broker_fee + gov_tax)
 
-        reference = request.data.get('reference', '')
+        if user.balance < total_deduction:
+            return Response(
+                {'error': f'Insufficient balance. KSh {_money(broker_fee + gov_tax)} in charges '
+                          'apply to this withdrawal.',
+                 'broker_fee': str(broker_fee),
+                 'government_tax': str(gov_tax),
+                 'total_charges': str(_money(broker_fee + gov_tax))},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         description = request.data.get('description', 'Withdrawal')
 
         with transaction.atomic():
-            Transaction.objects.create(
+            txn = Transaction.objects.create(
                 user=user,
-                amount=amount_value,
+                amount=total_deduction,
+                broker_fee=broker_fee,
+                government_tax=gov_tax,
                 category='withdrawal',
                 type='withdrawal',
-                description=description,
+                description=f"{description} (KSh {amount_value} + charges KSh {_money(broker_fee + gov_tax)})",
                 date=timezone.now(),
             )
 
-            User.objects.filter(id=user.id).update(balance=F('balance') - amount_value)
+            User.objects.filter(id=user.id).update(balance=F('balance') - total_deduction)
+
+            record_charges(
+                user, 'withdrawal', 'withdrawal', txn, amount_value,
+                account_number=user.account_number,
+                broker_fee=broker_fee, gov_tax=gov_tax,
+                broker_rate=broker_rate, tax_rate=tax_rate,
+            )
 
         user.refresh_from_db()
 
         return Response({
             'status': 'success',
-            'reference': reference,
+            'reference': txn.reference,
             'new_balance': str(user.balance),
+            'broker_fee': str(broker_fee),
+            'government_tax': str(gov_tax),
+            'total_charges': str(_money(broker_fee + gov_tax)),
         }, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['post'], url_path='transfer')
@@ -168,19 +274,32 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
         amount_value = Decimal(str(amount))
 
-        if sender.balance < amount_value:
-            return Response({'error': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
+        broker_fee, gov_tax, broker_rate, tax_rate = compute_tiered_charges(amount_value)
+        total_deduction = _money(amount_value + broker_fee + gov_tax)
+
+        if sender.balance < total_deduction:
+            return Response(
+                {'error': f'Insufficient balance. KSh {broker_fee + gov_tax} in charges '
+                          'apply to this transfer.',
+                 'broker_fee': str(broker_fee),
+                 'government_tax': str(gov_tax),
+                 'total_charges': str(_money(broker_fee + gov_tax))},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         with transaction.atomic():
-            User.objects.filter(id=sender.id).update(balance=F('balance') - amount_value)
+            User.objects.filter(id=sender.id).update(balance=F('balance') - total_deduction)
             User.objects.filter(id=recipient.id).update(balance=F('balance') + amount_value)
 
-            Transaction.objects.create(
+            sender_txn = Transaction.objects.create(
                     user=sender,
-                    amount=amount_value,
+                    amount=total_deduction,
+                    broker_fee=broker_fee,
+                    government_tax=gov_tax,
                     category='transfer_out',
                     type='withdrawal',
-                    description=f"Transfer to {recipient.phone_number}",
+                    description=f"Transfer to {recipient.phone_number} "
+                                f"(KSh {amount_value} + charges KSh {_money(broker_fee + gov_tax)})",
                     date=timezone.now(),
             )
 
@@ -193,48 +312,96 @@ class TransactionViewSet(viewsets.ModelViewSet):
                 date=timezone.now(),
             )
 
+            record_charges(
+                sender, 'transfer', 'transfer', sender_txn, amount_value,
+                account_number=sender.account_number,
+                broker_fee=broker_fee, gov_tax=gov_tax,
+                broker_rate=broker_rate, tax_rate=tax_rate,
+            )
+
         sender.refresh_from_db()
         recipient.refresh_from_db()
 
-        return Response({'status': 'success', 'reference': request.data.get('reference', '')}, status=status.HTTP_201_CREATED)
+        return Response({
+            'status': 'success',
+            'reference': sender_txn.reference,
+            'amount': str(amount_value),
+            'broker_fee': str(broker_fee),
+            'government_tax': str(gov_tax),
+            'total_charges': str(_money(broker_fee + gov_tax)),
+            'total_deduction': str(total_deduction),
+            'sender_balance': str(sender.balance),
+            'recipient_balance': str(recipient.balance),
+        }, status=status.HTTP_201_CREATED)
 
 class SavingsGoalViewSet(viewsets.ModelViewSet):
     queryset = SavingsGoal.objects.all()
     serializer_class = SavingsGoalSerializer
 
+    def get_queryset(self):
+        # Always scope to the authenticated user. Never trust a `user`
+        # query param — that would let anyone read another user's goals.
+        return SavingsGoal.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
     @action(detail=True, methods=['post'], url_path='fund')
     def fund(self, request, pk=None):
         goal = self.get_object()
-        user_id = request.data.get('user')
+        user = request.user
         amount = request.data.get('amount')
 
-        if not all([user_id, amount]):
-            return Response({'error': 'user and amount are required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not amount:
+            return Response({'error': 'amount is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            amount_value = Decimal(str(amount))
+        except (TypeError, ValueError, InvalidOperation):
+            return Response({'error': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
 
-        amount_value = Decimal(str(amount))
+        if amount_value <= 0:
+            return Response({'error': 'Amount must be greater than zero'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if user.balance < amount_value:
-            return Response({'error': 'Insufficient balance'}, status=status.HTTP_400_BAD_REQUEST)
+        broker_fee, gov_tax, broker_rate, tax_rate = compute_tiered_charges(amount_value)
+        total_deduction = _money(amount_value + broker_fee + gov_tax)
+
+        if user.balance < total_deduction:
+            return Response(
+                {'error': f'Insufficient balance. KSh {_money(broker_fee + gov_tax)} in charges '
+                          'apply.',
+                 'broker_fee': str(broker_fee),
+                 'government_tax': str(gov_tax),
+                 'total_charges': str(_money(broker_fee + gov_tax))},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         with transaction.atomic():
-            User.objects.filter(id=user.id).update(balance=F('balance') - amount_value)
+            User.objects.filter(id=user.id).update(
+                balance=F('balance') - total_deduction,
+                goal_wallet_balance=F('goal_wallet_balance') + amount_value,
+            )
 
-            Transaction.objects.create(
+            txn = Transaction.objects.create(
                 user=user,
-                amount=amount_value,
+                amount=total_deduction,
+                broker_fee=broker_fee,
+                government_tax=gov_tax,
                 category='savings_goal_funding',
                 type='withdrawal',
-                description=f'Funding goal: {goal.title}',
+                description=f'Funding goal: {goal.title} (KSh {amount_value} + charges KSh {_money(broker_fee + gov_tax)})',
                 date=timezone.now(),
             )
 
             SavingsGoal.objects.filter(id=goal.id).update(
                 saved_amount=F('saved_amount') + amount_value
+            )
+
+            record_charges(
+                user, 'goal_funding', 'goal_funding', txn, amount_value,
+                account_number=user.account_number,
+                broker_fee=broker_fee, gov_tax=gov_tax,
+                broker_rate=broker_rate, tax_rate=tax_rate,
             )
 
         user.refresh_from_db()
@@ -246,16 +413,134 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
             'goal_title': goal.title,
             'new_saved_amount': str(goal.saved_amount),
             'user_balance': str(user.balance),
+            'goal_wallet_balance': str(user.goal_wallet_balance),
+            'broker_fee': str(broker_fee),
+            'government_tax': str(gov_tax),
+            'total_charges': str(_money(broker_fee + gov_tax)),
         }, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'], url_path='withdraw')
+    def withdraw(self, request, pk=None):
+        goal = self.get_object()
+        user = request.user
+        amount = request.data.get('amount')
+
+        if not amount:
+            return Response({'error': 'amount is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            amount_value = Decimal(str(amount))
+        except (TypeError, ValueError, InvalidOperation):
+            return Response({'error': 'Invalid amount'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if amount_value <= 0:
+            return Response({'error': 'Amount must be greater than zero'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if goal.saved_amount < amount_value:
+            return Response({'error': 'Insufficient goal savings'}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            User.objects.filter(id=user.id).update(
+                balance=F('balance') + amount_value,
+                goal_wallet_balance=F('goal_wallet_balance') - amount_value,
+            )
+
+            Transaction.objects.create(
+                user=user,
+                amount=amount_value,
+                category='savings_goal_withdrawal',
+                type='deposit',
+                description=f'Withdrawal from goal: {goal.title}',
+                date=timezone.now(),
+            )
+
+            SavingsGoal.objects.filter(id=goal.id).update(
+                saved_amount=F('saved_amount') - amount_value
+            )
+
+        user.refresh_from_db()
+        goal.refresh_from_db()
+
+        return Response({
+            'status': 'success',
+            'amount': str(amount_value),
+            'goal_title': goal.title,
+            'new_saved_amount': str(goal.saved_amount),
+            'user_balance': str(user.balance),
+            'goal_wallet_balance': str(user.goal_wallet_balance),
+        }, status=status.HTTP_200_OK)
 
 
 class GoalTransactionViewSet(viewsets.ModelViewSet):
     queryset = GoalTransaction.objects.all()
     serializer_class = GoalTransactionSerializer
 
+    def get_queryset(self):
+        return GoalTransaction.objects.filter(user=self.request.user)
+
 class BudgetViewSet(viewsets.ModelViewSet):
     queryset = Budget.objects.all()
     serializer_class = BudgetSerializer
+
+    def get_queryset(self):
+        return Budget.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=False, methods=['get'], url_path='spending-analysis')
+    def spending_analysis(self, request):
+        """Real spending for the current and previous month, computed from the
+        Transaction table for the authenticated user (not from stored snapshots)."""
+        user = request.user
+
+        now = timezone.now()
+        current_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        current_end = (current_start + timedelta(days=32)).replace(day=1)
+        previous_start = (current_start - timedelta(days=1)).replace(day=1)
+        previous_end = current_start
+
+        def compute_spending(start, end):
+            rows = (
+                Transaction.objects.filter(
+                    user=user,
+                    type='withdrawal',
+                    date__gte=start,
+                    date__lt=end,
+                )
+                .values('category')
+                .annotate(total=Sum('amount'))
+            )
+            buckets = {}
+            for row in rows:
+                label = _spending_bucket(row['category'])
+                buckets[label] = buckets.get(label, Decimal('0')) + row['total']
+            return {k: str(v) for k, v in buckets.items()}
+
+        def budget_limits_for(start):
+            budget = Budget.objects.filter(user=user, month=start.strftime('%Y-%m')).first()
+            if not budget:
+                return {}
+            value = budget.budget_limits
+            if isinstance(value, str):
+                try:
+                    value = json.loads(value)
+                except (TypeError, ValueError):
+                    return {}
+            return value if isinstance(value, dict) else {}
+
+        return Response({
+            'current_month': {
+                'month': current_start.strftime('%Y-%m'),
+                'categories': compute_spending(current_start, current_end),
+                'budget_limits': budget_limits_for(current_start),
+            },
+            'previous_month': {
+                'month': previous_start.strftime('%Y-%m'),
+                'categories': compute_spending(previous_start, previous_end),
+                'budget_limits': budget_limits_for(previous_start),
+            },
+        })
 
 class UserLoanLimitViewSet(viewsets.ModelViewSet):
     queryset = UserLoanLimit.objects.all()

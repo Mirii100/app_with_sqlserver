@@ -10,10 +10,37 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def _load_env_file() -> None:
+    """Load backend/.env into os.environ without requiring python-dotenv.
+
+    Values with an empty string in the file override an existing env var.
+    """
+    env_path = BASE_DIR / '.env'
+    if not env_path.exists():
+        return
+    try:
+        with open(env_path, encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#') or '=' not in line:
+                    continue
+                key, _, value = line.partition('=')
+                key = key.strip()
+                value = value.strip().strip('"').strip("'")
+                if key:
+                    os.environ[key] = value
+    except OSError:
+        pass
+
+
+_load_env_file()
 
 
 # Quick-start development settings - unsuitable for production
@@ -50,6 +77,12 @@ INSTALLED_APPS = [
     'notifications',
     'transactions',
     'loans',
+    'subscriptions',
+    'investments',
+    'stocks',
+    'support',
+    'rewards',
+    'insights',
 ]
 
 
@@ -80,7 +113,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -159,7 +192,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Nairobi'
 
 USE_I18N = True
 
@@ -169,6 +202,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATIC_URL = 'static/'
 
 # Media files (user uploads: profile photos, ID photos, selfies)
@@ -178,6 +212,20 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Custom user model
 AUTH_USER_MODEL = 'core.User'
+
+# Email configuration
+# SMTP delivery via Gmail App Password. The OTP email is built in
+# `_send_otp_email()` (core/views.py) and delivered through this backend.
+# Credentials live in backend/.env (gitignored), not in this file.
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get(
+    'DEFAULT_FROM_EMAIL', 'Alexia Financials <njugunaalekii99@gmail.com>')
 
 # REST Framework
 REST_FRAMEWORK = {

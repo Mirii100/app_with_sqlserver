@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, SecuritySettings
+from .models import User, SecuritySettings, OtpCode
 
 
 @admin.register(User)
@@ -12,6 +12,7 @@ class UserAdmin(admin.ModelAdmin):
         'phone_number',
         'account_number',
         'balance',
+        'points',
         'loan_limit',
         'loan_used',
         'is_staff',
@@ -57,6 +58,7 @@ class UserAdmin(admin.ModelAdmin):
             'fields': (
                 'account_number',
                 'balance',
+                'points',
                 'loan_limit',
                 'loan_used',
             ),
@@ -90,5 +92,38 @@ class SecuritySettingsAdmin(admin.ModelAdmin):
         'user__phone_number',
     )
     readonly_fields = ('last_pin_changed',)
+    list_select_related = ('user',)
+    list_per_page = 25
+
+
+@admin.register(OtpCode)
+class OtpCodeAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'user',
+        'channel',
+        'purpose',
+        'destination',
+        'is_used',
+        'attempts',
+        'created_at',
+        'expires_at',
+    )
+    list_filter = (
+        'channel',
+        'purpose',
+        'is_used',
+    )
+    search_fields = (
+        'user__username',
+        'user__email',
+        'user__phone_number',
+        'destination',
+    )
+    readonly_fields = (
+        'code_hash',
+        'created_at',
+        'expires_at',
+    )
     list_select_related = ('user',)
     list_per_page = 25

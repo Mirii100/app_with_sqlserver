@@ -1,0 +1,170 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% load static %}
+{% block content_title %}
+<div style="display:flex; justify-content:space-between; align-items:center;">
+    <h1>Stock charges report</h1>
+    <a href="?format=csv" class="btn btn-primary">Export to CSV</a>
+</div>
+{% endblock %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <div class="card p-3 text-center">
+                <h6 class="text-muted mb-1">Total revenue (AlexiaFinancials)</h6>
+                <h3 class="mb-0">KSh {{ total_revenue|floatformat:2 }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card p-3 text-center">
+                <h6 class="text-muted mb-1">Invested in goals</h6>
+                <h3 class="mb-0">KSh {{ total_invested_goals|floatformat:2 }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card p-3 text-center">
+                <h6 class="text-muted mb-1">Invested in chamas</h6>
+                <h3 class="mb-0">KSh {{ total_invested_chamas|floatformat:2 }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card p-3 text-center">
+                <h6 class="text-muted mb-1">Invested in stocks</h6>
+                <h3 class="mb-0">KSh {{ total_invested_stocks|floatformat:2 }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="card p-3">
+                <h6 class="mb-3">Revenue by source</h6>
+                <div style="max-width:240px; margin:0 auto;">
+                    <canvas id="pieBySource" width="220" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card p-3">
+                <h6 class="mb-3">Revenue by charge type</h6>
+                <div style="max-width:240px; margin:0 auto;">
+                    <canvas id="pieByChargeType" width="220" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 mb-3">
+            <div class="card">
+                <div class="card-header">Recent charges</div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date / time</th>
+                                <th>Account</th>
+                                <th>User</th>
+                                <th>Stock</th>
+                                <th>Trade</th>
+                                <th>Source</th>
+                                <th>Charge type</th>
+                                <th class="text-end">Rate</th>
+                                <th class="text-end">Amount</th>
+                                <th class="text-end">Investor balances total</th>
+                                <th class="text-start">TX ref</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for c in charges %}
+                            <tr>
+                                <td>{{ c.created_at|date:"Y-m-d H:i" }}</td>
+                                <td>{{ c.account_number }}</td>
+                                <td>{{ c.user__username|default:"" }}</td>
+                                <td>{{ c.stock__code|default:"" }}</td>
+                                <td>{{ c.trade_type }}</td>
+                                <td>{{ c.source }}</td>
+                                <td>{{ c.charge_type }}</td>
+                                <td class="text-end">{{ c.charge_rate|floatformat:3 }}</td>
+                                <td class="text-end">KSh {{ c.amount|floatformat:2 }}</td>
+                                <td class="text-end">KSh {{ c.investor_balances_total|floatformat:2 }}</td>
+                                <td class="text-start">{{ c.transaction_reference|default:"" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="11" class="text-center text-muted">No charges recorded yet.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+var bySourceLabels = [];
+var bySourceData = [];
+{% for label, value in by_source.items %}
+bySourceLabels.push("{{ label }}");
+bySourceData.push({{ value|floatformat:2 }});
+{% endfor %}
+var byTradeLabels = [];
+var byTradeData = [];
+{% for label, value in by_trade.items %}
+byTradeLabels.push("{{ label }}");
+byTradeData.push({{ value|floatformat:2 }});
+{% endfor %}
+var byChargeTypeLabels = [];
+var byChargeTypeData = [];
+{% for label, value in by_charge_type.items %}
+byChargeTypeLabels.push("{{ label }}");
+byChargeTypeData.push({{ value|floatformat:2 }});
+{% endfor %}
+function newChart(ctx, labels, data, colors) {
+    return new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors,
+                borderColor: '#ffffff',
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: false,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { font: { size: 11 }, padding: 8 }
+                },
+                tooltip: {
+                    bodyFontSize: 11,
+                    callbacks: {
+                        label: function(ctx) {
+                            var total = ctx.dataset.data.reduce(function(a,b){return a+b;},0);
+                            var pct = total > 0 ? (ctx.parsed / total * 100).toFixed(1) + '%' : '';
+                            return ctx.label + ': KSh ' + ctx.parsed.toFixed(2) + ' (' + pct + ')';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+newChart(document.getElementById('pieBySource').getContext('2d'),
+         bySourceLabels, bySourceData,
+         ['#1e8e5a', '#c1443c', '#c9a227', '#12463f', '#6b7c8c']);
+newChart(document.getElementById('pieByTrade').getContext('2d'),
+         byTradeLabels, byTradeData,
+         ['#12463f', '#c1443c']);
+newChart(document.getElementById('pieByChargeType').getContext('2d'),
+         byChargeTypeLabels, byChargeTypeData,
+         ['#1e8e5a', '#c1443c', '#c9a227', '#12463f', '#6b7c8c']);
+</script>
+{% endblock %}
