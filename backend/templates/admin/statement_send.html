@@ -1,0 +1,89 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  {% if error %}
+    <p class="errornote">{{ error }}</p>
+  {% endif %}
+
+  <div class="module">
+    <h1>{% translate 'Send statement emails' %}</h1>
+    <p>
+      {% blocktranslate %}Pick a statement type and an optional date range. The range limits both
+      who receives the statement (users with matching activity in the period) and the period
+      shown inside the PDF. Leave the dates empty to email every eligible user with their
+      full history.{% endblocktranslate %}
+    </p>
+    <form method="post" action="{% url 'send_statements' %}">
+      {% csrf_token %}
+      <fieldset class="module aligned">
+        <div class="form-row">
+          <label for="id_type">{% translate 'Statement type' %}</label>
+          <select name="type" id="id_type">
+            <option value="account" {% if form.type == 'account' %}selected{% endif %}>{% translate 'Account statement' %}</option>
+            <option value="stocks" {% if form.type == 'stocks' %}selected{% endif %}>{% translate 'Shares statement' %}</option>
+            <option value="loans" {% if form.type == 'loans' %}selected{% endif %}>{% translate 'Loan statement' %}</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="id_from">{% translate 'From date' %}</label>
+          <input type="date" name="from_date" id="id_from" value="{{ form.from_date }}">
+          <div class="help">{% translate 'Only users active from this date (YYYY-MM-DD).' %}</div>
+        </div>
+        <div class="form-row">
+          <label for="id_to">{% translate 'To date' %}</label>
+          <input type="date" name="to_date" id="id_to" value="{{ form.to_date }}">
+          <div class="help">{% translate 'Only users active up to this date (YYYY-MM-DD).' %}</div>
+        </div>
+      </fieldset>
+      <div class="submit-row">
+        <input type="submit" value="{% translate 'Send now' %}" class="default">
+      </div>
+    </form>
+  </div>
+
+  {% if counts %}
+  <div class="module">
+    <h2>{% translate 'Eligible recipients (full history)' %}</h2>
+    <table>
+      <tbody>
+        <tr><td>{% translate 'Account statements' %}</td><td>{{ counts.account }} {% translate 'users' %}</td></tr>
+        <tr><td>{% translate 'Shares statements' %}</td><td>{{ counts.stocks }} {% translate 'users' %}</td></tr>
+        <tr><td>{% translate 'Loan statements' %}</td><td>{{ counts.loans }} {% translate 'users' %}</td></tr>
+      </tbody>
+    </table>
+    <div class="help">{% translate 'This is the number of recipients when no date range is set.' %}</div>
+  </div>
+  {% endif %}
+
+  {% if submitted %}
+  <div class="module">
+    <h2>{% translate 'Send results' %}</h2>
+    <p>
+      {% blocktranslate with sent_count=sent failed_count=failed %}Sent: {{ sent_count }} &middot; Failed: {{ failed_count }}{% endblocktranslate %}
+    </p>
+    {% if results %}
+    <table>
+      <thead>
+        <tr><th>{% translate 'User' %}</th><th>{% translate 'Email' %}</th><th>{% translate 'Status' %}</th></tr>
+      </thead>
+      <tbody>
+        {% for r in results %}
+        <tr>
+          <td>{{ r.user }}</td>
+          <td>{{ r.email }}</td>
+          <td>{{ r.status }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>{% translate 'No recipients matched the selected criteria.' %}</p>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

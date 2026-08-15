@@ -67,6 +67,7 @@ class UserSerializer(serializers.ModelSerializer):
             'selfie_photo',
             'biometric_enabled',
             'account_number',
+            'referral_code',
         ]
         read_only_fields = [
             'account_number', 'balance',

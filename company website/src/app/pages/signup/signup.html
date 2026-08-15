@@ -1,0 +1,162 @@
+<section class="page-hero auth-hero">
+  <div class="container">
+    <h1>Open an Account</h1>
+    <p class="subtitle">Join Alexia Financials in under 5 minutes. Free to open, no monthly fees.</p>
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Open an Account</div>
+  </div>
+</section>
+
+<div class="container auth-layout py-xl">
+  <div class="auth-side">
+    <span class="section-tag">Why Join Us</span>
+    <h2>Banking that puts you first</h2>
+    <ul class="checklist">
+      <li><i class="fa-solid fa-check"></i> Free account opening &amp; maintenance</li>
+      <li><i class="fa-solid fa-check"></i> Earn up to 12% interest on savings</li>
+      <li><i class="fa-solid fa-check"></i> Loans up to 3x your savings</li>
+      <li><i class="fa-solid fa-check"></i> 25 welcome points on signup</li>
+      <li><i class="fa-solid fa-check"></i> 50 bonus points for every friend you refer</li>
+      <li><i class="fa-solid fa-check"></i> Deposits KDIC-protected up to KSh 500,000</li>
+    </ul>
+    <div class="auth-quote card">
+      <i class="fa-solid fa-quote-left quote-icon"></i>
+      <p>Opening my account took less than five minutes. Best banking decision I've made.</p>
+      <strong>Grace W., Member since 2021</strong>
+    </div>
+  </div>
+
+  <div class="card auth-form-card">
+    <div *ngIf="success" class="success-box text-center">
+      <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+      <h3>Welcome to Alexia Financials!</h3>
+      <p>Your account has been opened successfully.</p>
+      <div class="account-summary">
+        <div>
+          <span class="meta-lbl">Account Name</span>
+          <span class="meta-val">{{ success.name }}</span>
+        </div>
+        <div>
+          <span class="meta-lbl">Account Number</span>
+          <span class="meta-val">{{ success.accountNumber }}</span>
+        </div>
+      </div>
+      <p class="small">You can now log in to your account using your email and password.</p>
+      <button class="btn btn-primary btn-block" (click)="goToLogin()">Proceed to Login</button>
+    </div>
+
+    <form *ngIf="!success" [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+      <div class="form-header">
+        <h3>Create Your Account</h3>
+        <p>Fields marked * are required.</p>
+      </div>
+
+      <div class="server-error" *ngIf="serverError">
+        <i class="fa-solid fa-circle-exclamation"></i> {{ serverError }}
+      </div>
+
+      <div class="form-section-label">Personal Information</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="full_name">Full Name *</label>
+          <input type="text" id="full_name" formControlName="full_name" placeholder="e.g. Jane Wambui" />
+          <div class="error" *ngIf="signupForm.get('full_name')?.touched && signupForm.get('full_name')?.invalid">Full name is required</div>
+          <div class="error" *ngIf="fieldErrors['full_name']">{{ fieldErrors['full_name'] }}</div>
+        </div>
+        <div class="form-group">
+          <label for="national_id">National ID / Passport *</label>
+          <input type="text" id="national_id" formControlName="national_id" placeholder="e.g. 12345678" />
+          <div class="error" *ngIf="signupForm.get('national_id')?.touched && signupForm.get('national_id')?.invalid">National ID is required</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="phone_number">Phone Number *</label>
+          <input type="tel" id="phone_number" formControlName="phone_number" placeholder="e.g. 0712345678" />
+          <div class="error" *ngIf="signupForm.get('phone_number')?.touched && signupForm.get('phone_number')?.invalid">Enter a valid phone number (e.g. 0712345678)</div>
+          <div class="error" *ngIf="fieldErrors['phone_number']">{{ fieldErrors['phone_number'] }}</div>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" formControlName="email" placeholder="e.g. jane@example.com" />
+          <div class="error" *ngIf="signupForm.get('email')?.touched && signupForm.get('email')?.invalid">Valid email is required</div>
+          <div class="error" *ngIf="fieldErrors['email']">{{ fieldErrors['email'] }}</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="username">Username *</label>
+          <input type="text" id="username" formControlName="username" placeholder="e.g. jane_wambui" />
+          <div class="error" *ngIf="signupForm.get('username')?.touched && signupForm.get('username')?.invalid">Username must be at least 3 characters</div>
+          <div class="error" *ngIf="fieldErrors['username']">{{ fieldErrors['username'] }}</div>
+        </div>
+        <div class="form-group">
+          <label for="referral_code">Referral Code (optional)</label>
+          <input type="text" id="referral_code" formControlName="referral_code" placeholder="e.g. A1B2C3D4" style="text-transform: uppercase;" />
+        </div>
+      </div>
+
+      <div class="form-section-label">Security</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Password *</label>
+          <input type="password" id="password" formControlName="password" placeholder="At least 6 characters" />
+          <div class="error" *ngIf="signupForm.get('password')?.touched && signupForm.get('password')?.invalid">Password must be at least 6 characters</div>
+        </div>
+        <div class="form-group">
+          <label for="confirm_password">Confirm Password *</label>
+          <input type="password" id="confirm_password" formControlName="confirm_password" placeholder="Repeat your password" />
+          <div class="error" *ngIf="signupForm.get('confirm_password')?.touched && signupForm.errors?.['mismatch']">Passwords do not match</div>
+        </div>
+      </div>
+
+      <div class="form-section-label">Location</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="county">County *</label>
+          <select id="county" formControlName="county">
+            <option value="">Select your county</option>
+            <option *ngFor="let county of counties" [value]="county">{{ county }}</option>
+          </select>
+          <div class="error" *ngIf="signupForm.get('county')?.touched && signupForm.get('county')?.invalid">Please select your county</div>
+        </div>
+        <div class="form-group">
+          <label for="town">Town / City *</label>
+          <input type="text" id="town" formControlName="town" placeholder="e.g. Nairobi" />
+          <div class="error" *ngIf="signupForm.get('town')?.touched && signupForm.get('town')?.invalid">Town is required</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="postal_code">Postal Code</label>
+          <input type="text" id="postal_code" formControlName="postal_code" placeholder="e.g. 00100" />
+        </div>
+      </div>
+
+      <div class="form-section-label">Employment &amp; Income</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="employment_type">Employment Type *</label>
+          <select id="employment_type" formControlName="employment_type">
+            <option value="">Select employment type</option>
+            <option *ngFor="let type of employmentTypes" [value]="type">{{ type }}</option>
+          </select>
+          <div class="error" *ngIf="signupForm.get('employment_type')?.touched && signupForm.get('employment_type')?.invalid">Please select employment type</div>
+        </div>
+        <div class="form-group">
+          <label for="monthly_income">Monthly Income (KES) *</label>
+          <input type="number" id="monthly_income" formControlName="monthly_income" placeholder="e.g. 50000" min="0" />
+          <div class="error" *ngIf="signupForm.get('monthly_income')?.touched && signupForm.get('monthly_income')?.invalid">Enter your monthly income</div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block submit-btn" [disabled]="submitting">
+        <span *ngIf="submitting"><i class="fa-solid fa-spinner fa-spin"></i> Creating account...</span>
+        <span *ngIf="!submitting">Create Account</span>
+      </button>
+
+      <p class="login-prompt text-center">Already have an account? <a routerLink="/login">Log in</a></p>
+    </form>
+  </div>
+</div>

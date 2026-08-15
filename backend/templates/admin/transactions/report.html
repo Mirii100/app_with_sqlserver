@@ -1,0 +1,22 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h1>Transaction Analytics</h1>
+    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+        <div style="width:400px; height:400px;"><canvas id="typeChart"></canvas></div>
+        <div style="width:400px; height:400px;"><canvas id="catChart"></canvas></div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+function createChart(id, labels, data, title) {
+    new Chart(document.getElementById(id), {
+        type: 'pie',
+        data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#1e8e5a', '#c1443c', '#c9a227', '#6b7c8c'] }] },
+        options: { plugins: { title: { display: true, text: title } } }
+    });
+}
+createChart('typeChart', [{% for r in by_type %}'{{r.type}}',{% endfor %}], [{% for r in by_type %}{{r.total}},{% endfor %}], 'By Type');
+createChart('catChart', [{% for r in by_cat %}'{{r.category}}',{% endfor %}], [{% for r in by_cat %}{{r.total}},{% endfor %}], 'By Category');
+</script>
+{% endblock %}

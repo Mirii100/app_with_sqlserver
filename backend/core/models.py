@@ -12,6 +12,23 @@ def generate_account_number():
         if number[0] != '0':
             return number
 
+def generate_referral_code():
+    """Generate a unique 8-character referral code."""
+    chars = string.ascii_uppercase + string.digits
+    while True:
+        code = ''.join(random.choices(chars, k=8))
+        if not User.objects.filter(referral_code=code).exists():
+            return code
+
+class AnalyticsDashboard(models.Model):
+    class Meta:
+        verbose_name = 'Business Analytics'
+        verbose_name_plural = 'Business Analytics'
+    name = models.CharField(max_length=1, default='A')
+    
+    def __str__(self):
+        return 'Business Analytics'
+
 class User(AbstractUser):
     phone_number = models.CharField(max_length=20, unique=True)
     full_name = models.CharField(max_length=255, null=True, blank=True)
@@ -32,6 +49,22 @@ class User(AbstractUser):
     # Unique account number for the user
     account_number = models.CharField(max_length=12, unique=True, blank=True, help_text="Unique account number generated on user creation")
 
+    # Referral
+    referral_code = models.CharField(
+        max_length=8,
+        unique=True,
+        blank=True,
+        help_text="Unique referral code shared with friends to earn points.",
+    )
+    referred_by = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='referrals',
+        help_text="User who referred this account.",
+    )
+
     # New image fields
     profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
     id_photo = models.ImageField(upload_to='id_photos/', null=True, blank=True)
@@ -40,6 +73,8 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         if not self.account_number:
             self.account_number = generate_account_number()
+        if not self.referral_code:
+            self.referral_code = generate_referral_code()
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -183,6 +183,14 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
             User.objects.filter(id=user.id).update(balance=F('balance') + amount_value)
 
+            from rewards.points import award_points
+            award_points(
+                user,
+                'deposit',
+                key=f'deposit:{txn.reference}',
+                description=f'Deposit of KSh {amount_value}',
+            )
+
         user.refresh_from_db()
 
         return Response({
@@ -395,6 +403,14 @@ class SavingsGoalViewSet(viewsets.ModelViewSet):
 
             SavingsGoal.objects.filter(id=goal.id).update(
                 saved_amount=F('saved_amount') + amount_value
+            )
+
+            from rewards.points import award_points
+            award_points(
+                user,
+                'goal_saving',
+                key=f'goal_fund:{txn.reference}',
+                description=f'Saved KSh {amount_value} toward "{goal.title}"',
             )
 
             record_charges(

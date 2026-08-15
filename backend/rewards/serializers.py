@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Reward, RewardTransaction
+from .models import Reward, RewardTransaction, PointsAward
 
 
 class RewardSerializer(serializers.ModelSerializer):
@@ -24,5 +24,20 @@ class RewardTransactionSerializer(serializers.ModelSerializer):
             'points_cost',
             'status',
             'status_display',
+            'created_at',
+        ]
+
+
+class PointsAwardSerializer(serializers.ModelSerializer):
+    reason_display = serializers.CharField(source='get_reason_display', read_only=True)
+
+    class Meta:
+        model = PointsAward
+        fields = [
+            'id',
+            'reason',
+            'reason_display',
+            'points',
+            'description',
             'created_at',
         ]

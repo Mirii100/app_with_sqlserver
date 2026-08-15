@@ -53,3 +53,36 @@ class RewardTransaction(models.Model):
 
     def __str__(self):
         return f'{self.user.username} redeemed {self.reward.name}'
+
+
+class PointsAward(models.Model):
+    """A loyalty-points award earned through app activity (deposits,
+    investments, goal savings, referrals or the signup bonus)."""
+
+    class Reason(models.TextChoices):
+        SIGNUP = 'signup', 'Welcome Bonus'
+        REFERRAL = 'referral', 'Referral Reward'
+        DEPOSIT = 'deposit', 'Money Deposit'
+        INVESTMENT = 'investment', 'Investment'
+        GOAL_SAVINGS = 'goal_saving', 'Savings Goal Deposit'
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='points_awards',
+    )
+    reason = models.CharField(max_length=20, choices=Reason.choices)
+    points = models.PositiveIntegerField()
+    description = models.CharField(max_length=255, blank=True, default='')
+    key = models.CharField(
+        max_length=64,
+        unique=True,
+        help_text='Unique event key so each award is granted only once.',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.user.username} +{self.points} pts ({self.get_reason_display()})'

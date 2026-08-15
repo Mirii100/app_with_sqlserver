@@ -1,0 +1,27 @@
+<section class="page-hero">
+  <div class="container">
+    <h1>News &amp; Media</h1>
+    <p class="subtitle">Latest announcements, awards and stories from across Alexia Financials.</p>
+    <div class="breadcrumb"><a routerLink="/">Home</a> / News &amp; Media</div>
+  </div>
+</section>
+
+<div class="container py-xl">
+  <div class="news-grid">
+    <article class="news-card card" *ngFor="let article of articles" [class.featured]="article.featured">
+      <div class="news-thumb" [style.background-image]="'url(' + article.image + ')'">
+        <span class="pill gold">{{ article.category }}</span>
+      </div>
+      <div class="news-body">
+        <span class="news-date"><i class="fa-solid fa-calendar-days"></i> {{ article.date }}</span>
+        <h3>{{ article.title }}</h3>
+        <p>{{ article.excerpt }}</p>
+        <a routerLink="/contact" class="text-link">Read more <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+    </article>
+  </div>
+
+  <div class="text-center mt-xl">
+    <a routerLink="/contact" class="btn btn-primary">Media Enquiries</a>
+  </div>
+</div>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10px;
+            color: #1a1a1a;
+        }
+        .bank-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00695c;
+        }
+        .bank-tagline {
+            font-size: 9px;
+            color: #666666;
+            margin-top: 2px;
+        }
+        .divider {
+            border-top: 2px solid #00695c;
+            margin: 8px 0 12px 0;
+        }
+        h1 {
+            font-size: 14px;
+            margin: 0 0 4px 0;
+        }
+        .meta {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .meta td {
+            padding: 2px 0;
+            font-size: 10px;
+        }
+        .meta .label {
+            color: #666666;
+            width: 40%;
+        }
+        .meta .value {
+            font-weight: bold;
+        }
+        table.transactions {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 6px;
+        }
+        table.transactions th {
+            background: #00695c;
+            color: #ffffff;
+            font-size: 9px;
+            padding: 6px 4px;
+            text-align: left;
+        }
+        table.transactions td {
+            border-bottom: 1px solid #dddddd;
+            padding: 5px 4px;
+            font-size: 9px;
+        }
+        .num {
+            text-align: right;
+        }
+        .credit {
+            color: #1b5e20;
+        }
+        .debit {
+            color: #b71c1c;
+        }
+        .totals-row td {
+            border-top: 2px solid #00695c;
+            font-weight: bold;
+            font-size: 10px;
+        }
+        .empty {
+            text-align: center;
+            color: #666666;
+            padding: 20px 0;
+        }
+        .footer {
+            margin-top: 18px;
+            font-size: 8px;
+            color: #888888;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="bank-name">Alexia Financials</div>
+    <div class="bank-tagline">Account statement &middot; generated {{ generated_at|date:"d M Y H:i" }} (EAT)</div>
+    <div class="divider"></div>
+
+    <h1>Account Statement</h1>
+
+    <table class="meta">
+        <tr><td class="label">Account holder</td><td class="value">{{ account_holder }}</td></tr>
+        <tr><td class="label">Account number</td><td class="value">{{ account_number }}</td></tr>
+        <tr><td class="label">Account type</td><td class="value">{{ account_type|default:"Savings" }}</td></tr>
+        <tr><td class="label">Currency</td><td class="value">{{ currency }}</td></tr>
+        <tr><td class="label">Period</td><td class="value">{{ period_label }}</td></tr>
+    </table>
+
+    <table class="transactions">
+        <thead>
+            <tr>
+                <th style="width:14%">Date</th>
+                <th style="width:34%">Description</th>
+                <th style="width:22%">Reference</th>
+                <th class="num" style="width:15%">Debit</th>
+                <th class="num" style="width:15%">Credit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if rows %}
+                {% for r in rows %}
+                <tr>
+                    <td>{{ r.date|date:"d M Y" }}</td>
+                    <td>{{ r.description|default:"—" }}</td>
+                    <td>{{ r.reference|default:"" }}</td>
+                    <td class="num debit">{{ r.debit|default:"" }}</td>
+                    <td class="num credit">{{ r.credit|default:"" }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr><td class="empty" colspan="5">No transactions recorded for this account.</td></tr>
+            {% endif %}
+            <tr class="totals-row">
+                <td colspan="3">Totals &middot; Opening balance {{ opening_balance }} &middot; Closing balance {{ closing_balance }}</td>
+                <td class="num">{{ total_debits }}</td>
+                <td class="num">{{ total_credits }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer">
+        This is a system-generated statement from Alexia Financials. If you did not request it, please contact support immediately.<br>
+        Generated at {{ generated_at|date:"d M Y H:i T" }}
+    </div>
+</body>
+</html>

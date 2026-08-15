@@ -4,8 +4,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Reward, RewardTransaction
-from .serializers import RewardSerializer, RewardTransactionSerializer
+from .models import Reward, RewardTransaction, PointsAward
+from .serializers import RewardSerializer, RewardTransactionSerializer, PointsAwardSerializer
 
 
 class RewardViewSet(viewsets.ReadOnlyModelViewSet):
@@ -20,6 +20,16 @@ class RewardViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'], url_path='points')
     def points(self, request):
         return Response({'points': request.user.points})
+
+    @action(detail=False, methods=['get'], url_path='points-history')
+    def points_history(self, request):
+        awards = PointsAward.objects.filter(user=request.user).select_related('user')
+        redemptions = RewardTransaction.objects.filter(user=request.user).select_related('reward')
+        return Response({
+            'points': request.user.points,
+            'awards': PointsAwardSerializer(awards, many=True).data,
+            'redemptions': RewardTransactionSerializer(redemptions, many=True).data,
+        })
 
     @action(detail=False, methods=['get'], url_path='my-transactions')
     def my_transactions(self, request):

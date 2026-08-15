@@ -23,6 +23,7 @@ from decimal import Decimal, InvalidOperation
 
 from transactions.models import Transaction
 from stocks.fees import compute_tiered_charges, record_charges, _money
+from .email_utils import email_statement_to_user, email_stock_statement_to_user, email_loan_statement_to_user
 
 logger = logging.getLogger(__name__)
 
@@ -196,6 +197,31 @@ def signup(request):
 
         SecuritySettings.objects.get_or_create(user=user)
 
+        from rewards.points import award_points
+
+        referrer = None
+        referral_code = (request.data.get('referral_code') or '').strip().upper()
+        if referral_code:
+            referrer = User.objects.filter(referral_code=referral_code).exclude(id=user.id).first()
+            if referrer:
+                user.referred_by = referrer
+                user.save(update_fields=['referred_by'])
+                award_points(
+                    referrer,
+                    'referral',
+                    key=f'referral:{referrer.id}:{user.id}',
+                    description=f'You referred {user.full_name or user.username}',
+                )
+
+        award_points(
+            user,
+            'signup',
+            key=f'signup:{user.id}',
+            description='Welcome bonus',
+            notify=False,
+        )
+
+        user.refresh_from_db()
         token, created = Token.objects.get_or_create(user=user)
         return Response({
             'token': token.key,
@@ -204,6 +230,8 @@ def signup(request):
             'full_name': user.get_full_name() or user.username,
             'phone': user.phone_number,
             'account_number': user.account_number,
+            'referral_code': user.referral_code,
+            'points': user.points,
         }, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -554,3 +582,106 @@ def _track_new_device(request, user, device_fingerprint, device_name,
             'ip_address': ip_address,
         },
     )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def email_statement(request):
+    """Email the authenticated user's account statement as a PDF attachment."""
+    user = request.user
+
+    if not user.email:
+        return Response(
+            {'error': 'No email address on file. Update your profile first.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    ok = email_statement_to_user(user)
+    if not ok:
+        return Response(
+            {'error': 'Failed to send your statement. Please try again later.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    Notification.objects.create(
+        user=user,
+        title='Account statement sent',
+        message=f'Your account statement was emailed to {user.email}.',
+        type='general',
+    )
+
+    return Response({'message': f'Statement sent to {user.email}.'})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def email_stock_statement(request):
+    """Email the authenticated user's shares statement as a PDF attachment."""
+    from stocks.models import ShareHolding
+
+    user = request.user
+
+    if not user.email:
+        return Response(
+            {'error': 'No email address on file. Update your profile first.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if not ShareHolding.objects.filter(user=user).exists():
+        return Response(
+            {'error': 'No shares in your portfolio to send a statement for.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    ok = email_stock_statement_to_user(user)
+    if not ok:
+        return Response(
+            {'error': 'Failed to send your statement. Please try again later.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    Notification.objects.create(
+        user=user,
+        title='Shares statement sent',
+        message=f'Your shares statement was emailed to {user.email}.',
+        type='general',
+    )
+
+    return Response({'message': f'Shares statement sent to {user.email}.'})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def email_loan_statement(request):
+    """Email the authenticated user's loan statement as a PDF attachment."""
+    from loans.models import Loan
+
+    user = request.user
+
+    if not user.email:
+        return Response(
+            {'error': 'No email address on file. Update your profile first.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if not Loan.objects.filter(user=user).exists():
+        return Response(
+            {'error': 'No loans on this account to send a statement for.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    ok = email_loan_statement_to_user(user)
+    if not ok:
+        return Response(
+            {'error': 'Failed to send your statement. Please try again later.'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    Notification.objects.create(
+        user=user,
+        title='Loan statement sent',
+        message=f'Your loan statement was emailed to {user.email}.',
+        type='general',
+    )
+
+    return Response({'message': f'Loan statement sent to {user.email}.'})

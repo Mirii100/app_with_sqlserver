@@ -1,13 +1,81 @@
+<div class="top-bar">
+  <div class="container top-bar-content">
+    <div class="security-alert">
+      <i class="fa-solid fa-shield-halved"></i> Security Alert: Alexia Financials will never ask for your PIN or OTP via SMS or call.
+    </div>
+    <div class="quick-access">
+      <a routerLink="/rates"><i class="fa-solid fa-percent"></i> Rates</a>
+      <a routerLink="/security"><i class="fa-solid fa-lock"></i> Security</a>
+      <a routerLink="/faq"><i class="fa-solid fa-circle-question"></i> Help &amp; FAQ</a>
+      <span class="top-phone"><i class="fa-solid fa-phone"></i> +254 700 000 000</span>
+      <a routerLink="/login" class="gold-text"><i class="fa-solid fa-building-columns"></i> Member Login</a>
+      <a href="#" class="gold-text"><i class="fa-solid fa-mobile-screen-button"></i> Alexia-Pesa App</a>
+    </div>
+  </div>
+</div>
+
 <header class="navbar">
   <div class="container navbar-content">
-    <div class="logo"><strong>Alexia Financials</strong></div>
-    <nav>
+    <div class="logo" routerLink="/">
+      <span class="logo-text">Alexia</span><span class="logo-sub">Financials</span>
+    </div>
+
+    <button class="hamburger" [class.open]="menuOpen" (click)="toggleMenu()" aria-label="Toggle navigation" [attr.aria-expanded]="menuOpen">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav [class.open]="menuOpen">
+      <button class="drawer-close" (click)="toggleMenu()" aria-label="Close navigation"><i class="fa-solid fa-xmark"></i></button>
       <ul class="nav-links">
-        <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a></li>
-        <li><a routerLink="/about" routerLinkActive="active">About</a></li>
-        <li><a routerLink="/services" routerLinkActive="active">Services</a></li>
-        <li><a routerLink="/contact" routerLinkActive="active" class="btn-cta">Contact</a></li>
+        <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">Home</a></li>
+
+        <li class="dropdown">
+          <a routerLink="/services" routerLinkActive="active" (click)="toggleDropdown('services')">
+            Banking &amp; Services <i class="fa-solid fa-chevron-down dropdown-caret"></i>
+          </a>
+          <ul class="dropdown-menu" [class.open]="activeDropdown === 'services'">
+            <li><a routerLink="/services" (click)="closeMenu()"><i class="fa-solid fa-user"></i> Personal Banking</a></li>
+            <li><a routerLink="/services" (click)="closeMenu()"><i class="fa-solid fa-briefcase"></i> Business Banking</a></li>
+            <li><a routerLink="/services" (click)="closeMenu()"><i class="fa-solid fa-people-group"></i> Chama Solutions</a></li>
+            <li><a routerLink="/services" (click)="closeMenu()"><i class="fa-solid fa-earth-africa"></i> Diaspora Banking</a></li>
+            <li><a routerLink="/services" (click)="closeMenu()"><i class="fa-solid fa-piggy-bank"></i> Savings &amp; Investment</a></li>
+          </ul>
+        </li>
+
+        <li class="dropdown">
+          <a routerLink="/loans" routerLinkActive="active" (click)="toggleDropdown('loans')">
+            Loans <i class="fa-solid fa-chevron-down dropdown-caret"></i>
+          </a>
+          <ul class="dropdown-menu" [class.open]="activeDropdown === 'loans'">
+            <li><a routerLink="/loans" (click)="closeMenu()"><i class="fa-solid fa-sack-dollar"></i> Personal Loans</a></li>
+            <li><a routerLink="/loans" (click)="closeMenu()"><i class="fa-solid fa-building"></i> Business Loans</a></li>
+            <li><a routerLink="/loans" (click)="closeMenu()"><i class="fa-solid fa-truck"></i> Asset Finance</a></li>
+            <li><a routerLink="/loans" (click)="closeMenu()"><i class="fa-solid fa-wallet"></i> Salary Advance</a></li>
+          </ul>
+        </li>
+
+        <li><a routerLink="/rates" routerLinkActive="active" (click)="closeMenu()">Rates</a></li>
+
+        <li class="dropdown">
+          <a (click)="toggleDropdown('resources')" class="no-link">
+            Resources <i class="fa-solid fa-chevron-down dropdown-caret"></i>
+          </a>
+          <ul class="dropdown-menu" [class.open]="activeDropdown === 'resources'">
+            <li><a routerLink="/about" (click)="closeMenu()"><i class="fa-solid fa-book-open"></i> Our Story</a></li>
+            <li><a routerLink="/security" (click)="closeMenu()"><i class="fa-solid fa-lock"></i> Security Center</a></li>
+            <li><a routerLink="/faq" (click)="closeMenu()"><i class="fa-solid fa-circle-question"></i> FAQ</a></li>
+            <li><a routerLink="/news" (click)="closeMenu()"><i class="fa-solid fa-newspaper"></i> News &amp; Insights</a></li>
+            <li><a routerLink="/careers" (click)="closeMenu()"><i class="fa-solid fa-user-tie"></i> Careers</a></li>
+            <li><a routerLink="/branches" (click)="closeMenu()"><i class="fa-solid fa-map-location-dot"></i> Branches &amp; Agents</a></li>
+          </ul>
+        </li>
+
+        <li *ngIf="!isAuthenticated()"><a routerLink="/login" routerLinkActive="active" (click)="closeMenu()">Login</a></li>
+        <li *ngIf="isAuthenticated()"><a routerLink="/account" routerLinkActive="active" (click)="closeMenu()"><i class="fa-solid fa-circle-user"></i> My Account</a></li>
+        <li><a routerLink="/signup" (click)="closeMenu()" class="btn btn-primary btn-sm nav-cta">Open an Account</a></li>
       </ul>
     </nav>
+
+    <div class="nav-backdrop" [class.open]="menuOpen" (click)="closeMenu()"></div>
   </div>
 </header>

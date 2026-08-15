@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import User, SecuritySettings, OtpCode
-
+from . import admin_analytics
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
@@ -13,6 +13,7 @@ class UserAdmin(admin.ModelAdmin):
         'account_number',
         'balance',
         'points',
+        'referral_code',
         'loan_limit',
         'loan_used',
         'is_staff',
@@ -34,6 +35,7 @@ class UserAdmin(admin.ModelAdmin):
     )
     readonly_fields = (
         'account_number',
+        'referral_code',
         'date_joined',
         'last_login',
     )
@@ -62,6 +64,9 @@ class UserAdmin(admin.ModelAdmin):
                 'loan_limit',
                 'loan_used',
             ),
+        }),
+        ('Referral', {
+            'fields': ('referral_code', 'referred_by'),
         }),
         ('Documents', {
             'fields': ('profile_photo', 'id_photo', 'selfie_photo'),

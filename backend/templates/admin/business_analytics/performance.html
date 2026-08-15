@@ -1,0 +1,22 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h1>Business Performance Dashboard</h1>
+    <h3>Total Assets: KSh {{ total|floatformat:2 }}</h3>
+    <div style="width:500px; height:500px;"><canvas id="performanceChart"></canvas></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+new Chart(document.getElementById('performanceChart'), {
+    type: 'pie',
+    data: { 
+        labels: [{% for key, value in data.items %}'{{key}}',{% endfor %}], 
+        datasets: [{ 
+            data: [{% for key, value in data.items %}{{value}},{% endfor %}], 
+            backgroundColor: ['#1e8e5a', '#c1443c', '#c9a227', '#6b7c8c'] 
+        }] 
+    },
+    options: { plugins: { title: { display: true, text: 'Portfolio Occupation' } } }
+});
+</script>
+{% endblock %}

@@ -15,7 +15,8 @@ from transactions.views import (
     BillPaymentViewSet,
     ReportViewSet,
 )
-from core.views import signup, login, UserDetailView, SecuritySettingsViewSet, transfer_loan_to_main, transfer_to_chama_wallet, transfer_to_goal_wallet, change_password, request_otp, verify_otp
+from core.views import signup, login, UserDetailView, SecuritySettingsViewSet, transfer_loan_to_main, transfer_to_chama_wallet, transfer_to_goal_wallet, change_password, request_otp, verify_otp, email_statement, email_stock_statement, email_loan_statement
+from core.admin_statements import send_statements_view
 from loans.views import LoanViewSet, LoanProductViewSet
 from notifications.views import NotificationViewSet
 from subscriptions.views import SubscriptionViewSet, SubscriptionWalletView
@@ -65,10 +66,18 @@ urlpatterns = [
     path("api/auth/otp/request/", request_otp),
     path("api/auth/otp/verify/", verify_otp),
     path("api/auth/token/", drf_views.obtain_auth_token),
+    path("api/email-statement/", email_statement),
+    path("api/email-stock-statement/", email_stock_statement),
+    path("api/email-loan-statement/", email_loan_statement),
     path("api/users/<int:pk>/", UserDetailView.as_view()),
     path("api/transfer-loan-to-main/", transfer_loan_to_main),
     path("api/transfer-to-chama-wallet/", transfer_to_chama_wallet),
     path("api/transfer-to-goal-wallet/", transfer_to_goal_wallet),
+    path(
+        "admin/send-statements/",
+        admin.site.admin_view(send_statements_view),
+        name="send_statements",
+    ),
     path("admin/", admin.site.urls),
 ]
 

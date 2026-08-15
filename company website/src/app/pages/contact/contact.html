@@ -1,18 +1,119 @@
-<div class="content">
-  <h1>Contact Us</h1>
-  <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
-    <div>
-      <label for="name">Name:</label>
-      <input id="name" formControlName="name" />
+<section class="page-hero">
+  <div class="container">
+    <h1>Get in Touch</h1>
+    <p class="subtitle">We're here to help you navigate your financial journey. Reach out today.</p>
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Contact Us</div>
+  </div>
+</section>
+
+<div class="container py-xl">
+  <div class="contact-grid">
+    <div class="contact-info">
+      <div class="info-card card">
+        <h3>Contact Information</h3>
+        <p>Reach us through any of these channels — our team is ready to assist.</p>
+
+        <div class="info-item">
+          <span class="icon"><i class="fa-solid fa-location-dot"></i></span>
+          <div>
+            <strong>Head Office</strong>
+            <p>Alexia Towers, 4th Floor, Upper Hill, Nairobi</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <span class="icon"><i class="fa-solid fa-phone"></i></span>
+          <div>
+            <strong>Phone Support</strong>
+            <p>+254 700 000 000 (General)<br>+254 200 000 000 (Corporate)</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <span class="icon"><i class="fa-solid fa-envelope"></i></span>
+          <div>
+            <strong>Email Us</strong>
+            <p>info@alexiafinancials.com<br>support@alexiafinancials.com</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <span class="icon"><i class="fa-solid fa-clock"></i></span>
+          <div>
+            <strong>Business Hours</strong>
+            <p>Mon - Fri: 8:30 AM - 4:00 PM<br>Sat: 9:00 AM - 12:00 PM</p>
+          </div>
+        </div>
+
+        <div class="social-links">
+          <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+          <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+      </div>
+
+      <div class="notice mt-lg">
+        <h4><i class="fa-solid fa-satellite-dish"></i> 24/7 emergency line</h4>
+        <p>Lost card, lost phone or suspected fraud? Call <strong>+254 700 000 911</strong> — answered around the clock.</p>
+      </div>
+
+      <div class="branch-locator card mt-lg">
+        <div class="feature-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+        <h3>Locate a Branch</h3>
+        <p>Find the nearest Alexia Financials branch or agent near you.</p>
+        <a routerLink="/branches" class="btn btn-outline btn-block">View Branches</a>
+      </div>
     </div>
-    <div>
-      <label for="email">Email:</label>
-      <input id="email" formControlName="email" />
+
+    <div class="contact-form-container card">
+      <div *ngIf="submitted" class="success-message text-center">
+        <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <h2>Message Received!</h2>
+        <p>Thank you for reaching out. One of our relationship managers will contact you within 24 hours.</p>
+        <button class="btn btn-primary" (click)="submitted = false">Send Another Message</button>
+      </div>
+
+      <form *ngIf="!submitted" [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+        <h3>Send us a Message</h3>
+        <p>Complete the form below and we'll get back to you shortly.</p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" formControlName="name" placeholder="e.g. John Doe" />
+            <div class="error" *ngIf="contactForm.get('name')?.touched && contactForm.get('name')?.invalid">Name is required</div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" formControlName="email" placeholder="e.g. john@example.com" />
+            <div class="error" *ngIf="contactForm.get('email')?.touched && contactForm.get('email')?.invalid">Valid email is required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="subject">Subject</label>
+          <select id="subject" formControlName="subject">
+            <option value="">Select a reason for contact</option>
+            <option value="personal">Personal Banking Inquiry</option>
+            <option value="business">Business Financing</option>
+            <option value="chama">Chama Account Support</option>
+            <option value="diaspora">Diaspora Banking</option>
+            <option value="complaint">Feedback / Complaint</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="message">Your Message</label>
+          <textarea id="message" formControlName="message" rows="5" placeholder="How can we help you?"></textarea>
+          <div class="error" *ngIf="contactForm.get('message')?.touched && contactForm.get('message')?.invalid">Message cannot be empty</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" [disabled]="contactForm.invalid">Send Message</button>
+      </form>
     </div>
-    <div>
-      <label for="message">Message:</label>
-      <textarea id="message" formControlName="message"></textarea>
-    </div>
-    <button type="submit" [disabled]="contactForm.invalid">Submit</button>
-  </form>
+  </div>
 </div>

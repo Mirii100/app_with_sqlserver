@@ -1,0 +1,50 @@
+.careers-intro p {
+  font-size: 1rem;
+}
+
+.perks-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.perk h4 {
+  margin-bottom: var(--spacing-xs);
+  font-size: 1.05rem;
+}
+
+.perk p {
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.job-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.job-row h3 {
+  margin-bottom: var(--spacing-xs);
+}
+
+.job-tags {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .perks-grid {
+    grid-template-columns: 1fr;
+  }
+}

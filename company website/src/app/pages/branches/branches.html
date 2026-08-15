@@ -1,0 +1,42 @@
+<section class="page-hero">
+  <div class="container">
+    <h1>Find a Branch</h1>
+    <p class="subtitle">Visit us in person. Our branches are ready to serve you.</p>
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Branches</div>
+  </div>
+</section>
+
+<div class="container py-xl">
+  <div class="section-heading">
+    <span class="section-tag">Locations</span>
+    <h2>Nationwide, and always growing</h2>
+    <p>Our branch network serves communities across Kenya, with more locations on the way.</p>
+  </div>
+
+  <div class="branches-grid">
+    <div class="branch-card card" *ngFor="let branch of branches">
+      <div class="branch-header">
+        <div class="branch-icon"><i class="fa-solid fa-location-dot"></i></div>
+        <h3>{{ branch.name }}</h3>
+      </div>
+      <ul class="branch-details">
+        <li><i class="fa-solid fa-map-location-dot"></i> {{ branch.address }}</li>
+        <li><i class="fa-solid fa-phone"></i> {{ branch.phone }}</li>
+        <li><i class="fa-solid fa-clock"></i> {{ branch.hours }}</li>
+      </ul>
+      <div class="branch-services">
+        <span class="pill burgundy" *ngFor="let s of branch.services">{{ s }}</span>
+      </div>
+      <a href="{{ branch.map }}" target="_blank" rel="noopener" class="btn btn-outline btn-block">Get Directions</a>
+    </div>
+  </div>
+
+  <div class="notice">
+    <h4><i class="fa-solid fa-truck-fast"></i> Mobile &amp; agency banking</h4>
+    <p>Can't make it to a branch? Use our Alexia-Pesa app, USSD (*571#) or visit any of our 1,200+ agent locations nationwide for cash deposits and withdrawals.</p>
+  </div>
+
+  <div class="text-center mt-xl">
+    <a routerLink="/contact" class="btn btn-primary">Contact Us</a>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h1>Chama Analytics</h1>
+    <div style="width:400px; height:400px;"><canvas id="statusChart"></canvas></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+new Chart(document.getElementById('statusChart'), {
+    type: 'pie',
+    data: { labels: [{% for r in by_status %}'{{r.status}}',{% endfor %}], datasets: [{ data: [{% for r in by_status %}{{r.total}},{% endfor %}], backgroundColor: ['#1e8e5a', '#c1443c'] }] },
+    options: { plugins: { title: { display: true, text: 'Total Pool Balance by Status' } } }
+});
+</script>
+{% endblock %}

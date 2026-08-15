@@ -2,12 +2,32 @@ import { Routes } from '@angular/router';
 import { Home } from './pages/home/home';
 import { About } from './pages/about/about';
 import { Services } from './pages/services/services';
+import { Loans } from './pages/loans/loans';
+import { Rates } from './pages/rates/rates';
+import { Security } from './pages/security/security';
+import { Careers } from './pages/careers/careers';
+import { Branches } from './pages/branches/branches';
+import { Faq } from './pages/faq/faq';
+import { News } from './pages/news/news';
 import { Contact } from './pages/contact/contact';
+import { Signup } from './pages/signup/signup';
+import { Login } from './pages/login/login';
+import { Account } from './pages/account/account';
 
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'about', component: About },
   { path: 'services', component: Services },
+  { path: 'loans', component: Loans },
+  { path: 'rates', component: Rates },
+  { path: 'security', component: Security },
+  { path: 'careers', component: Careers },
+  { path: 'branches', component: Branches },
+  { path: 'faq', component: Faq },
+  { path: 'news', component: News },
   { path: 'contact', component: Contact },
+  { path: 'signup', component: Signup },
+  { path: 'login', component: Login },
+  { path: 'account', component: Account },
   { path: '**', redirectTo: '' }
 ];

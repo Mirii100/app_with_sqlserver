@@ -1,0 +1,108 @@
+<section class="page-hero">
+  <div class="container">
+    <h1>My Account</h1>
+    <p class="subtitle">Welcome back{{ user?.full_name ? ', ' + user.full_name.split(' ')[0] : '' }} — here's your overview.</p>
+    <div class="breadcrumb"><a routerLink="/">Home</a> / My Account</div>
+  </div>
+</section>
+
+<div class="container py-xl">
+  <div class="load-error notice danger" *ngIf="loadError">
+    <h4><i class="fa-solid fa-triangle-exclamation"></i> Something went wrong</h4>
+    <p>{{ loadError }}</p>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-xl">
+    <i class="fa-solid fa-spinner fa-spin loading-icon"></i>
+    <p>Loading your account...</p>
+  </div>
+
+  <div *ngIf="!loading && user && !loadError">
+    <div class="account-head">
+      <div class="avatar">{{ (user.full_name || user.email || 'U')[0].toUpperCase() }}</div>
+      <div class="account-identity">
+        <h2>{{ user.full_name || 'Member' }}</h2>
+        <p>{{ user.email }}</p>
+      </div>
+      <button class="btn btn-outline" (click)="logout()"><i class="fa-solid fa-right-from-bracket"></i> Log Out</button>
+    </div>
+
+    <div class="account-overview">
+      <div class="overview-card card">
+        <span class="overview-lbl">Main Account Balance</span>
+        <span class="overview-val">{{ formatMoney(user.balance) }}</span>
+        <span class="overview-sub">Account No. {{ user.account_number }}</span>
+      </div>
+      <div class="overview-card card">
+        <span class="overview-lbl">Loan Wallet</span>
+        <span class="overview-val">{{ formatMoney(user.loan_wallet_balance) }}</span>
+        <span class="overview-sub">Limit: {{ formatMoney(user.loan_limit) }} · Used: {{ formatMoney(user.loan_used) }}</span>
+      </div>
+      <div class="overview-card card">
+        <span class="overview-lbl">Chama Wallet</span>
+        <span class="overview-val">{{ formatMoney(user.chama_wallet_balance) }}</span>
+      </div>
+      <div class="overview-card card">
+        <span class="overview-lbl">Goal Wallet</span>
+        <span class="overview-val">{{ formatMoney(user.goal_wallet_balance) }}</span>
+      </div>
+      <div class="overview-card card accent">
+        <span class="overview-lbl">Loyalty Points</span>
+        <span class="overview-val gold">{{ user.points ?? 0 }}</span>
+        <span class="overview-sub">Share your code and earn 50 points per referral</span>
+      </div>
+    </div>
+
+    <div class="account-details card">
+      <h3>Profile Details</h3>
+      <div class="details-grid">
+        <div>
+          <span class="meta-lbl">Full Name</span>
+          <span class="meta-val">{{ user.full_name || '—' }}</span>
+        </div>
+        <div>
+          <span class="meta-lbl">Username</span>
+          <span class="meta-val">{{ user.username }}</span>
+        </div>
+        <div>
+          <span class="meta-lbl">Email</span>
+          <span class="meta-val">{{ user.email }}</span>
+        </div>
+        <div>
+          <span class="meta-lbl">Phone</span>
+          <span class="meta-val">{{ user.phone_number }}</span>
+        </div>
+        <div>
+          <span class="meta-lbl">National ID</span>
+          <span class="meta-val">{{ user.national_id || '—' }}</span>
+        </div>
+        <div>
+          <span class="meta-lbl">County</span>
+          <span class="meta-val">{{ user.county || '—' }}</span>
+        </div>
+        <div>
+          <span class="meta-lbl">Town</span>
+          <span class="meta-val">{{ user.town || '—' }}</span>
+        </div>
+        <div>
+          <span class="meta-lbl">Employment</span>
+          <span class="meta-val">{{ user.employment_type || '—' }}</span>
+        </div>
+        <div>
+          <span class="meta-lbl">Monthly Income</span>
+          <span class="meta-val">{{ formatMoney(user.monthly_income) }}</span>
+        </div>
+        <div>
+          <span class="meta-lbl">Referral Code</span>
+          <span class="meta-val referral">{{ user.referral_code || '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="account-actions">
+      <a routerLink="/rates" class="btn btn-primary"><i class="fa-solid fa-percent"></i> View Rates</a>
+      <a routerLink="/loans" class="btn btn-outline"><i class="fa-solid fa-sack-dollar"></i> Explore Loans</a>
+      <a routerLink="/contact" class="btn btn-outline"><i class="fa-solid fa-headset"></i> Get Support</a>
+    </div>
+  </div>
+</div>

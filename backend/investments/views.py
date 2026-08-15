@@ -136,6 +136,14 @@ class InvestmentViewSet(viewsets.ModelViewSet):
                 date=timezone.now(),
             )
 
+            from rewards.points import award_points
+            award_points(
+                user,
+                'investment',
+                key=f'investment:{investment.id}',
+                description=f'Invested KSh {calc["amount"]} in {product.name}',
+            )
+
         return Response({
             'status': 'success',
             'investment': InvestmentSerializer(investment).data,

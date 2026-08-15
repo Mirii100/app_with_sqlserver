@@ -1,0 +1,52 @@
+<section class="page-hero">
+  <div class="container">
+    <h1>Careers</h1>
+    <p class="subtitle">Build a meaningful career that helps Kenyans grow their wealth.</p>
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Careers</div>
+  </div>
+</section>
+
+<div class="container py-xl">
+  <div class="careers-intro grid-2">
+    <div>
+      <span class="section-tag">Why Work With Us</span>
+      <h2>Do work that matters</h2>
+      <p>At Alexia Financials, we combine the discipline of a regulated institution with the purpose of a member-owned organisation. Every role here touches real people's financial lives.</p>
+      <p>We invest in our people with continuous learning, clear growth paths and a culture that celebrates integrity and innovation.</p>
+    </div>
+    <div class="perks-grid">
+      <div class="perk card" *ngFor="let perk of perks">
+        <div class="feature-icon"><i class="{{ perk.icon }}"></i></div>
+        <h4>{{ perk.title }}</h4>
+        <p>{{ perk.desc }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="openings mt-xl">
+    <div class="section-heading">
+      <span class="section-tag">Open Positions</span>
+      <h2>Current opportunities</h2>
+      <p>Explore roles across our growing team.</p>
+    </div>
+
+    <div class="job-list">
+      <div class="job-row card" *ngFor="let job of jobs">
+        <div class="job-info">
+          <h3>{{ job.title }}</h3>
+          <div class="job-tags">
+            <span class="pill burgundy">{{ job.department }}</span>
+            <span class="pill gold">{{ job.location }}</span>
+            <span class="pill green">{{ job.type }}</span>
+          </div>
+        </div>
+        <a routerLink="/contact" class="btn btn-outline">Apply Now</a>
+      </div>
+    </div>
+
+    <div class="notice">
+      <h4><i class="fa-solid fa-paper-plane"></i> Didn't find your role?</h4>
+      <p>We're always looking for great talent. Send your CV to careers@alexiafinancials.com and we'll keep your details on file.</p>
+    </div>
+  </div>
+</div>

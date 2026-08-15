@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10px;
+            color: #1a1a1a;
+        }
+        .bank-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00695c;
+        }
+        .bank-tagline {
+            font-size: 9px;
+            color: #666666;
+            margin-top: 2px;
+        }
+        .divider {
+            border-top: 2px solid #00695c;
+            margin: 8px 0 12px 0;
+        }
+        h1 {
+            font-size: 14px;
+            margin: 0 0 4px 0;
+        }
+        .meta {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .meta td {
+            padding: 2px 0;
+            font-size: 10px;
+        }
+        .meta .label {
+            color: #666666;
+            width: 40%;
+        }
+        .meta .value {
+            font-weight: bold;
+        }
+        table.loans {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 6px;
+        }
+        table.loans th {
+            background: #00695c;
+            color: #ffffff;
+            font-size: 9px;
+            padding: 6px 4px;
+            text-align: left;
+        }
+        table.loans td {
+            border-bottom: 1px solid #dddddd;
+            padding: 5px 4px;
+            font-size: 9px;
+        }
+        .num {
+            text-align: right;
+        }
+        .totals-row td {
+            border-top: 2px solid #00695c;
+            font-weight: bold;
+            font-size: 10px;
+        }
+        table.repayments {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table.repayments th {
+            background: #333333;
+            color: #ffffff;
+            font-size: 9px;
+            padding: 6px 4px;
+            text-align: left;
+        }
+        table.repayments td {
+            border-bottom: 1px solid #dddddd;
+            padding: 5px 4px;
+            font-size: 9px;
+        }
+        .empty {
+            text-align: center;
+            color: #666666;
+            padding: 20px 0;
+        }
+        .footer {
+            margin-top: 18px;
+            font-size: 8px;
+            color: #888888;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="bank-name">Alexia Financials</div>
+    <div class="bank-tagline">Loan statement &middot; period: {{ period_label }} &middot; generated {{ generated_at|date:"d M Y H:i" }} (EAT)</div>
+    <div class="divider"></div>
+
+    <h1>Loan Statement</h1>
+
+    <table class="meta">
+        <tr><td class="label">Account holder</td><td class="value">{{ account_holder }}</td></tr>
+        <tr><td class="label">Currency</td><td class="value">{{ currency }}</td></tr>
+    </table>
+
+    <table class="loans">
+        <thead>
+            <tr>
+                <th style="width:7%">ID</th>
+                <th style="width:20%">Product</th>
+                <th class="num" style="width:11%">Amount</th>
+                <th class="num" style="width:11%">Approved</th>
+                <th class="num" style="width:12%">Outstanding</th>
+                <th class="num" style="width:9%">Rate</th>
+                <th class="num" style="width:9%">Months</th>
+                <th style="width:10%">Status</th>
+                <th style="width:11%">Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if rows %}
+                {% for r in rows %}
+                <tr>
+                    <td>#{{ r.id }}</td>
+                    <td>{{ r.product|default:"—" }}</td>
+                    <td class="num">{{ r.amount }}</td>
+                    <td class="num">{{ r.approved_amount }}</td>
+                    <td class="num">{{ r.outstanding }}</td>
+                    <td class="num">{{ r.interest_rate }}%</td>
+                    <td class="num">{{ r.duration_months }}</td>
+                    <td>{{ r.status }}</td>
+                    <td>{{ r.created|date:"d M Y" }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr><td class="empty" colspan="9">No loans recorded for this account.</td></tr>
+            {% endif %}
+            <tr class="totals-row">
+                <td colspan="2">Totals</td>
+                <td class="num">{{ total_borrowed }}</td>
+                <td class="num">{{ total_approved }}</td>
+                <td class="num">{{ total_outstanding }}</td>
+                <td colspan="4"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="repayments">
+        <thead>
+            <tr>
+                <th style="width:14%">Date</th>
+                <th style="width:42%">Description</th>
+                <th style="width:16%">Reference</th>
+                <th class="num" style="width:14%">Amount</th>
+                <th class="num" style="width:14%">Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if repayments %}
+                {% for r in repayments %}
+                <tr>
+                    <td>{{ r.date|date:"d M Y" }}</td>
+                    <td>{{ r.description|default:"Loan repayment" }}</td>
+                    <td>{{ r.reference }}</td>
+                    <td class="num">{{ r.amount }}</td>
+                    <td class="num">{{ r.balance }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr><td class="empty" colspan="5">No repayment activity yet.</td></tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        This is a system-generated statement from Alexia Financials. If you did not request it, please contact support immediately.<br>
+        Generated at {{ generated_at|date:"d M Y H:i T" }}
+    </div>
+</body>
+</html>

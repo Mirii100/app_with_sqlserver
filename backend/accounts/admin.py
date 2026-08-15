@@ -16,8 +16,21 @@ class AccountAdmin(admin.ModelAdmin):
         urls = super().get_urls()
         custom_urls = [
             path('ledger/', self.admin_site.admin_view(self.ledger_view), name='accounts_ledger'),
+            path('report/', self.admin_site.admin_view(self.report_view), name='accounts_report'),
         ]
         return custom_urls + urls
+
+    def report_view(self, request):
+        from django.db.models import Sum
+        accounts = Account.objects.all()
+        by_type = accounts.values('account_type').annotate(total=Sum('balance'))
+        
+        context = self.admin_site.each_context(request)
+        context.update({
+            'title': 'Account Analytics',
+            'by_type': list(by_type),
+        })
+        return render(request, 'admin/accounts/report.html', context)
 
     def ledger_view(self, request):
         # Fetch accounts and related transactions

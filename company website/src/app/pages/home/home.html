@@ -1,8 +1,353 @@
-<app-hero-section 
-  title="Welcome to Our Financial Solutions" 
-  subtitle="Empowering your financial future with professional services." 
+<app-hero-section
+  title="Your Future, Secured with Alexia"
+  subtitle="Innovative banking and SACCO solutions for Personal, Business, Chama and Diaspora wealth creation."
 />
-<section class="content">
-  <h2>Our Core Services</h2>
-  <p>Providing top-tier financial management and consulting solutions tailored for you.</p>
+
+<!-- Trust / Stats Strip -->
+<section class="py-lg bg-light">
+  <div class="container">
+    <div class="stats-strip" style="margin-top: -70px; position: relative; z-index: 5;">
+      <div class="stat-box">
+        <i class="fa-solid fa-users"></i>
+        <span class="stat-val">500K+</span>
+        <span class="stat-label">Active Members</span>
+      </div>
+      <div class="stat-box">
+        <i class="fa-solid fa-map-location-dot"></i>
+        <span class="stat-val">47</span>
+        <span class="stat-label">Counties Served</span>
+      </div>
+      <div class="stat-box">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span class="stat-val">CBK</span>
+        <span class="stat-label">Licensed &amp; Regulated</span>
+      </div>
+      <div class="stat-box">
+        <i class="fa-solid fa-headset"></i>
+        <span class="stat-val">24/7</span>
+        <span class="stat-label">Member Support</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="py-xl">
+  <div class="container">
+    <div class="section-heading">
+      <span class="section-tag">Why Alexia</span>
+      <h2>Banking built around your life</h2>
+      <p>We combine the stability of a regulated institution with the speed and care of a member-owned SACCO.</p>
+    </div>
+
+    <div class="why-grid">
+      <div class="why-item card">
+        <div class="feature-icon"><i class="fa-solid fa-piggy-bank"></i></div>
+        <h3>Member-First Returns</h3>
+        <p>Competitive interest on savings and annual dividends shared directly with our members.</p>
+      </div>
+      <div class="why-item card">
+        <div class="feature-icon gold"><i class="fa-solid fa-bolt"></i></div>
+        <h3>Instant Digital Banking</h3>
+        <p>Send money, pay bills, save and invest in seconds with the Alexia-Pesa mobile app.</p>
+      </div>
+      <div class="why-item card">
+        <div class="feature-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
+        <h3>Accessible Financing</h3>
+        <p>Loans designed around salary earners, small businesses, chamas and diaspora members.</p>
+      </div>
+      <div class="why-item card">
+        <div class="feature-icon gold"><i class="fa-solid fa-shield-heart"></i></div>
+        <h3>Deposit Protection</h3>
+        <p>Deposits protected up to KSh 500,000 by KDIC for total peace of mind.</p>
+      </div>
+      <div class="why-item card">
+        <div class="feature-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <h3>Financial Literacy</h3>
+        <p>Free workshops, credit coaching and tools to help you make smarter money decisions.</p>
+      </div>
+      <div class="why-item card">
+        <div class="feature-icon gold"><i class="fa-solid fa-users"></i></div>
+        <h3>Community Roots</h3>
+        <p>We are owned by our members and reinvest in the communities we serve across Kenya.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Financial Hub (Calculators) -->
+<section class="financial-hub py-xl bg-light">
+  <div class="container">
+    <div class="section-heading">
+      <span class="section-tag">Plan With Us</span>
+      <h2>Financial tools at your fingertips</h2>
+      <p>Estimate your loan repayments and check live exchange rates in seconds.</p>
+    </div>
+
+    <div class="hub-grid">
+      <!-- Loan Calculator -->
+      <div class="hub-card card">
+        <div class="card-header">
+          <span class="icon"><i class="fa-solid fa-calculator"></i></span>
+          <h3>Loan Repayment Calculator</h3>
+        </div>
+        <p class="card-desc">Estimate your monthly repayments based on current rates.</p>
+
+        <div class="calculator-body">
+          <div class="form-group">
+            <label>Loan Amount (KES): <strong>{{ loanAmount | number }}</strong></label>
+            <input type="range" min="10000" max="5000000" step="10000" [(ngModel)]="loanAmount" (input)="calculateLoan()" />
+          </div>
+
+          <div class="form-group">
+            <label>Repayment Period (Months): <strong>{{ loanTerm }}</strong></label>
+            <input type="range" min="3" max="72" step="1" [(ngModel)]="loanTerm" (input)="calculateLoan()" />
+          </div>
+
+          <div class="form-group">
+            <label>Interest Rate (% p.a.): <strong>{{ interestRate }}%</strong></label>
+            <input type="range" min="5" max="24" step="0.5" [(ngModel)]="interestRate" (input)="calculateLoan()" />
+          </div>
+
+          <div class="repayment-display">
+            <span class="label">Estimated Monthly Repayment</span>
+            <span class="value">KES {{ monthlyRepayment | number:'1.0-0' }}</span>
+          </div>
+
+          <a routerLink="/loans" class="btn btn-primary btn-block">Apply for a Loan</a>
+        </div>
+      </div>
+
+      <!-- Currency Converter -->
+      <div class="hub-card card">
+        <div class="card-header">
+          <span class="icon"><i class="fa-solid fa-arrow-right-arrow-left"></i></span>
+          <h3>Live Exchange Rates</h3>
+        </div>
+        <p class="card-desc">Convert major world currencies to KES instantly.</p>
+
+        <div class="converter-body">
+          <div class="converter-inputs">
+            <div class="input-group">
+              <input type="number" [(ngModel)]="amountToConvert" (input)="convertCurrency()" />
+              <select [(ngModel)]="baseCurrency" (change)="convertCurrency()">
+                <option *ngFor="let curr of currencies" [value]="curr">{{ curr }}</option>
+              </select>
+            </div>
+
+            <div class="swap-icon"><i class="fa-solid fa-arrow-down"></i></div>
+
+            <div class="input-group">
+              <input type="number" [ngModel]="convertedAmount | number:'1.2-2'" readonly />
+              <select [(ngModel)]="targetCurrency" (change)="convertCurrency()">
+                <option *ngFor="let curr of currencies" [value]="curr">{{ curr }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="rates-table">
+            <div class="rate-row" *ngFor="let curr of ['USD', 'GBP', 'EUR']">
+              <span class="curr-name">{{ curr }}/KES</span>
+              <span class="curr-val">{{ exchangeRates[curr] | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-xl">
+  <div class="container">
+    <div class="section-heading">
+      <span class="section-tag">Getting Started</span>
+      <h2>Open an account in three simple steps</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step-item">
+        <div class="step-number">1</div>
+        <div class="feature-icon"><i class="fa-solid fa-file-signature"></i></div>
+        <h3>Apply</h3>
+        <p>Fill in a short application online or at any branch with your national ID and proof of income.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-number">2</div>
+        <div class="feature-icon gold"><i class="fa-solid fa-user-check"></i></div>
+        <h3>Verify</h3>
+        <p>We verify your details and approve your membership — usually within 24 hours.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-number">3</div>
+        <div class="feature-icon"><i class="fa-solid fa-wallet"></i></div>
+        <h3>Start Banking</h3>
+        <p>Download the Alexia-Pesa app, activate your account and start saving, borrowing and investing.</p>
+      </div>
+    </div>
+    <div class="text-center mt-xl">
+      <a routerLink="/contact" class="btn btn-primary">Start Your Application</a>
+    </div>
+  </div>
+</section>
+
+<!-- Products Showcase -->
+<section class="products-showcase py-xl bg-light">
+  <div class="container">
+    <div class="section-heading">
+      <span class="section-tag">Our Products</span>
+      <h2>Banking Beyond Limits</h2>
+      <p>Explore products designed to accelerate your financial goals.</p>
+    </div>
+
+    <div class="products-grid">
+      <div class="product-item card">
+        <div class="product-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+        <h3>Alexia-Pesa App</h3>
+        <p>Manage your accounts, pay bills, and invest on the go with our top-rated mobile app.</p>
+        <a routerLink="/services" class="gold-link">Download Now <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="product-item card">
+        <div class="product-icon"><i class="fa-solid fa-chart-line"></i></div>
+        <h3>Asset Management</h3>
+        <p>Professional wealth management strategies for long-term financial independence.</p>
+        <a routerLink="/services" class="gold-link">Learn More <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="product-item card">
+        <div class="product-icon"><i class="fa-solid fa-house-chimney"></i></div>
+        <h3>Mortgage Solutions</h3>
+        <p>Competitive rates for your dream home with flexible repayment options up to 20 years.</p>
+        <a routerLink="/loans" class="gold-link">View Rates <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="product-item card">
+        <div class="product-icon"><i class="fa-solid fa-people-group"></i></div>
+        <h3>Chama Accounts</h3>
+        <p>Group savings, loans and investments with transparent returns and member dashboards.</p>
+        <a routerLink="/services" class="gold-link">Join a Chama <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="product-item card">
+        <div class="product-icon"><i class="fa-solid fa-earth-africa"></i></div>
+        <h3>Diaspora Banking</h3>
+        <p>Multi-currency savings, remittances and home loans for Kenyans living abroad.</p>
+        <a routerLink="/services" class="gold-link">Bank From Abroad <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="product-item card">
+        <div class="product-icon"><i class="fa-solid fa-business-time"></i></div>
+        <h3>Business Financing</h3>
+        <p>Working capital, asset finance and trade solutions to scale your enterprise.</p>
+        <a routerLink="/loans" class="gold-link">Grow Your Business <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Rates Teaser -->
+<section class="rates-teaser py-xl">
+  <div class="container">
+    <div class="rates-teaser-card">
+      <div>
+        <span class="section-tag" style="color: var(--color-secondary);">Transparent Pricing</span>
+        <h2>Know your numbers. No hidden fees.</h2>
+        <p>Clear, published rates for savings, loans and everyday banking — because you deserve transparency.</p>
+        <a routerLink="/rates" class="btn btn-secondary">View Full Rate Card</a>
+      </div>
+      <div class="rates-highlights">
+        <div class="rate-chip">
+          <span class="rate-num">12%</span>
+          <span class="rate-lbl">Savings Interest</span>
+        </div>
+        <div class="rate-chip">
+          <span class="rate-num">13.5%</span>
+          <span class="rate-lbl">Personal Loan</span>
+        </div>
+        <div class="rate-chip">
+          <span class="rate-num">0.5%</span>
+          <span class="rate-lbl">Monthly Chama Return</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-xl bg-light">
+  <div class="container">
+    <div class="section-heading">
+      <span class="section-tag">Member Stories</span>
+      <h2>Trusted by members across Kenya</h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial card" *ngFor="let t of testimonials">
+        <div class="quote-icon"><i class="fa-solid fa-quote-left"></i></div>
+        <p class="quote">{{ t.quote }}</p>
+        <div class="testimonial-author">
+          <div class="avatar">{{ t.name[0] }}</div>
+          <div>
+            <strong>{{ t.name }}</strong>
+            <span>{{ t.role }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Mini -->
+<section class="py-xl">
+  <div class="container">
+    <div class="faq-layout">
+      <div>
+        <span class="section-tag">Common Questions</span>
+        <h2>Answers before you even ask</h2>
+        <p>Everything you need to know about banking with Alexia Financials. Can't find what you need? Our team is one call away.</p>
+        <a routerLink="/faq" class="btn btn-outline mt-xl">Visit Full FAQ</a>
+      </div>
+      <div class="faq-list">
+        <div class="accordion-item" *ngFor="let faq of faqs; let i = index" [class.open]="faq.open">
+          <button class="accordion-header" (click)="toggleFaq(i)">
+            <span>{{ faq.question }}</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="accordion-body" *ngIf="faq.open">{{ faq.answer }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- App Download Banner -->
+<section class="app-banner">
+  <div class="container app-banner-content">
+    <div class="app-info">
+      <span class="section-tag" style="color: var(--color-secondary);">Bank On The Go</span>
+      <h2>Alexia-Pesa. Your bank in your pocket.</h2>
+      <p>Send money, pay bills, save, borrow and invest — anytime, anywhere. Rated 4.8/5 by 100,000+ users.</p>
+      <div class="store-buttons">
+        <a href="#" class="store-btn"><i class="fa-brands fa-apple"></i><span>Download on the <strong>App Store</strong></span></a>
+        <a href="#" class="store-btn"><i class="fa-brands fa-google-play"></i><span>Get it on <strong>Google Play</strong></span></a>
+      </div>
+    </div>
+    <div class="app-phone">
+      <i class="fa-solid fa-mobile-screen"></i>
+      <span class="app-rating"><i class="fa-solid fa-star"></i> 4.8</span>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Banner -->
+<section class="cta-banner py-xl text-center">
+  <div class="container">
+    <div class="cta-content card">
+      <h2>Ready to start your journey?</h2>
+      <p>Join over 500,000 Kenyans who trust Alexia Financials for their banking needs.</p>
+      <div class="cta-btns">
+        <a routerLink="/signup" class="btn btn-primary">Open an Account</a>
+        <a routerLink="/branches" class="btn btn-outline-white">Find a Branch</a>
+      </div>
+    </div>
+  </div>
 </section>

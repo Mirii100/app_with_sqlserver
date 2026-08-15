@@ -1,15 +1,68 @@
-<div class="content">
-  <h1>Our Services</h1>
-  
-  <div *ngIf="loading">
-    <app-skeleton-loader [height]="30" />
-    <app-skeleton-loader [height]="30" />
-    <app-skeleton-loader [height]="30" />
+<section class="page-hero">
+  <div class="container">
+    <h1>Our Banking Solutions</h1>
+    <p class="subtitle">Tailored financial services designed to meet your unique needs.</p>
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Services</div>
   </div>
-  
-  <ul *ngIf="!loading && services.length > 0">
-    <li *ngFor="let service of services">{{ service.name || 'Service Item' }}</li>
-  </ul>
-  
-  <p *ngIf="!loading && services.length === 0">No services available at the moment.</p>
+</section>
+
+<div class="container py-xl">
+  <div class="services-tabs">
+    <div
+      *ngFor="let cat of categories"
+      class="tab-item"
+      [class.active]="activeCategoryId === cat.id"
+      (click)="setActiveCategory(cat.id)"
+    >
+      <span class="tab-icon"><i class="{{ cat.icon }}"></i></span>
+      <span class="tab-name">{{ cat.name }}</span>
+    </div>
+  </div>
+
+  <div class="tab-content card">
+    <div class="content-header">
+      <span class="section-tag">{{ activeCategory?.name }}</span>
+      <h2>{{ activeCategory?.description }}</h2>
+      <p>Everything you need under one roof — backed by personal guidance.</p>
+    </div>
+
+    <div class="details-grid">
+      <div class="detail-card" *ngFor="let detail of activeCategory?.details">
+        <h4><i class="fa-solid fa-circle-check"></i> {{ detail.name }}</h4>
+        <p>{{ detail.desc }}</p>
+      </div>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-item" *ngFor="let feature of activeCategory?.features">
+        <span class="check-icon"><i class="fa-solid fa-check"></i></span>
+        <span>{{ feature }}</span>
+      </div>
+    </div>
+
+    <div class="cta-section">
+      <a routerLink="/signup" class="btn btn-primary">Open an Account</a>
+      <a routerLink="/loans" class="btn btn-outline">Explore Loans</a>
+      <a routerLink="/rates" class="btn btn-ghost">View Rates</a>
+    </div>
+  </div>
+
+  <div class="api-content mt-xl" *ngIf="services.length > 0">
+    <div class="section-heading">
+      <span class="section-tag">Additional Specialized Services</span>
+      <h3>More ways we can help</h3>
+    </div>
+    <div class="api-grid">
+      <div class="api-card card" *ngFor="let service of services">
+        <h4>{{ service.name }}</h4>
+        <p>{{ service.description || 'Professional banking service component.' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice mt-xl">
+    <h4><i class="fa-solid fa-headset"></i> Not sure which service fits?</h4>
+    <p>Talk to a relationship manager who will walk you through the right options — free of charge.</p>
+    <a routerLink="/contact" class="btn btn-primary mt-sm">Get Personal Advice</a>
+  </div>
 </div>

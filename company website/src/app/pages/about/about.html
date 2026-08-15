@@ -1,4 +1,109 @@
-<div class="content">
-  <h1>About Us</h1>
-  <p>We are a dedicated team committed to providing innovative financial solutions.</p>
+<section class="page-hero">
+  <div class="container">
+    <h1>About Alexia Financials</h1>
+    <p class="subtitle">A member-owned financial institution driving prosperity across Kenya since 2010.</p>
+    <div class="breadcrumb"><a routerLink="/">Home</a> / About Us</div>
+  </div>
+</section>
+
+<section class="py-lg bg-light">
+  <div class="container">
+    <div class="stats-strip" style="margin-top: -70px; position: relative; z-index: 5;">
+      <div class="stat-box">
+        <i class="fa-solid fa-users"></i>
+        <span class="stat-val">500K+</span>
+        <span class="stat-label">Active Members</span>
+      </div>
+      <div class="stat-box">
+        <i class="fa-solid fa-award"></i>
+        <span class="stat-val">15+</span>
+        <span class="stat-label">Years of Service</span>
+      </div>
+      <div class="stat-box">
+        <i class="fa-solid fa-coins"></i>
+        <span class="stat-val">KSh 40B</span>
+        <span class="stat-label">Assets Under Management</span>
+      </div>
+      <div class="stat-box">
+        <i class="fa-solid fa-map-location-dot"></i>
+        <span class="stat-val">1,200+</span>
+        <span class="stat-label">Branches &amp; Agents</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container py-xl">
+  <div class="about-grid">
+    <div class="about-text">
+      <span class="section-tag">Who We Are</span>
+      <h2>Empowering communities through responsible finance</h2>
+      <p>Alexia Financials is a premier, member-owned financial institution dedicated to innovative, accessible and secure banking. We believe financial empowerment is the cornerstone of community growth.</p>
+      <p>From salary accounts and personal loans to chama collective investment and diaspora banking, we combine the discipline of a regulated institution with the purpose of a cooperative — putting member returns first.</p>
+
+      <div class="values-list mt-xl">
+        <div class="value-item" *ngFor="let value of values">
+          <div class="value-icon"><i class="{{ value.icon }}"></i></div>
+          <h3>{{ value.name }}</h3>
+          <p>{{ value.desc }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-side">
+      <div class="mission-card card">
+        <div class="feature-icon"><i class="fa-solid fa-bullseye"></i></div>
+        <h3>Our Mission</h3>
+        <p>To deliver secure, accessible and innovative financial services that grow wealth and transform lives for our members and communities.</p>
+      </div>
+      <div class="mission-card card mt-lg">
+        <div class="feature-icon gold"><i class="fa-solid fa-eye"></i></div>
+        <h3>Our Vision</h3>
+        <p>To be Kenya's most trusted member-owned financial institution, reaching every county and every Kenyan at home or abroad.</p>
+      </div>
+      <div class="cert-badge">
+        <i class="fa-solid fa-certificate"></i>
+        <span>Licensed &amp; regulated institution — deposits KDIC-protected up to KSh 500,000</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="timeline-section mt-xxl">
+    <div class="section-heading">
+      <span class="section-tag">Our Journey</span>
+      <h2>Milestones that shaped us</h2>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item" *ngFor="let m of milestones">
+        <div class="timeline-dot"><i class="fa-solid fa-chevron-down"></i></div>
+        <div class="timeline-card card">
+          <span class="timeline-year">{{ m.year }}</span>
+          <h3>{{ m.title }}</h3>
+          <p>{{ m.desc }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="leadership mt-xxl">
+    <div class="section-heading">
+      <span class="section-tag">Leadership</span>
+      <h2>Executive team</h2>
+      <p>Guided by a vision of sustainable, member-first financial growth.</p>
+    </div>
+
+    <div class="leaders-grid">
+      <div class="leader-card card" *ngFor="let leader of leaders">
+        <div class="leader-avatar">{{ leader.initials }}</div>
+        <h3>{{ leader.name }}</h3>
+        <p class="leader-title">{{ leader.title }}</p>
+        <p class="leader-bio">{{ leader.bio }}</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="text-center mt-xxl">
+    <a routerLink="/careers" class="btn btn-primary">Join Our Team</a>
+    <a routerLink="/contact" class="btn btn-outline">Talk to Us</a>
+  </div>
 </div>

@@ -1,0 +1,77 @@
+.faq-categories {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+}
+
+.cat-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.cat-heading h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.cat-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(123, 0, 28, 0.08);
+  color: var(--color-primary);
+  font-size: 1.1rem;
+}
+
+.accordion-item {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.accordion-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-md) 0;
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--color-navy);
+  text-align: left;
+  transition: var(--transition);
+}
+
+.accordion-header:hover {
+  color: var(--color-primary);
+}
+
+.accordion-chevron {
+  color: var(--color-secondary-dark);
+  font-size: 0.8rem;
+  transition: transform 0.25s ease;
+}
+
+.accordion-item.open .accordion-chevron {
+  transform: rotate(180deg);
+}
+
+.accordion-body p {
+  margin: 0 0 var(--spacing-md);
+  font-size: 0.93rem;
+}
+
+@media (max-width: 768px) {
+  .faq-categories {
+    grid-template-columns: 1fr;
+  }
+}

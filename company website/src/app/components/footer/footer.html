@@ -1,23 +1,99 @@
 <footer class="footer">
-  <div class="container footer-content">
-    <div class="footer-section">
-      <h3>Alexia Financials</h3>
-      <p>Your trusted partner in comprehensive financial solutions.</p>
-    </div>
-    <div class="footer-section">
-      <h4>Quick Links</h4>
-      <ul>
-        <li><a routerLink="/">Home</a></li>
-        <li><a routerLink="/about">About</a></li>
-        <li><a routerLink="/services">Services</a></li>
-      </ul>
-    </div>
-    <div class="footer-section">
-      <h4>Contact</h4>
-      <p>Email: info@alexiafinancials.com</p>
+  <div class="container footer-top">
+    <div class="footer-grid">
+      <div class="footer-column brand-info">
+        <div class="footer-logo">
+          <span class="logo-text">Alexia</span><span class="logo-sub">Financials</span>
+        </div>
+        <p>Your trusted partner in comprehensive financial solutions, committed to driving prosperity across Kenya and beyond.</p>
+        <div class="social-links">
+          <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" aria-label="X (Twitter)"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+
+        <div class="newsletter">
+          <h4>Stay informed</h4>
+          <p>Product updates, financial tips and exclusive offers.</p>
+          <form class="newsletter-form" (ngSubmit)="subscribed = true">
+            <input type="email" placeholder="Your email address" required aria-label="Email address" />
+            <button type="submit" class="btn btn-secondary btn-sm" [disabled]="subscribed">
+              {{ subscribed ? 'Subscribed ✓' : 'Subscribe' }}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="footer-column">
+        <h4>Personal Banking</h4>
+        <ul>
+          <li><a routerLink="/services">Current Accounts</a></li>
+          <li><a routerLink="/services">Savings Accounts</a></li>
+          <li><a routerLink="/loans">Personal Loans</a></li>
+          <li><a routerLink="/loans">Salary Advance</a></li>
+          <li><a routerLink="/services">Debit Cards</a></li>
+          <li><a routerLink="/services">Mobile Banking</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4>Business &amp; Chama</h4>
+        <ul>
+          <li><a routerLink="/services">Business Current Account</a></li>
+          <li><a routerLink="/loans">Business Loans</a></li>
+          <li><a routerLink="/services">Trade Finance</a></li>
+          <li><a routerLink="/services">Chama Accounts</a></li>
+          <li><a routerLink="/services">Diaspora Banking</a></li>
+          <li><a routerLink="/services">Investment Management</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4>Company</h4>
+        <ul>
+          <li><a routerLink="/about">Our Story</a></li>
+          <li><a routerLink="/about">Leadership</a></li>
+          <li><a routerLink="/careers">Careers</a></li>
+          <li><a routerLink="/news">News &amp; Insights</a></li>
+          <li><a routerLink="/security">Security Center</a></li>
+          <li><a routerLink="/rates">Rates &amp; Fees</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4>Contact &amp; Support</h4>
+        <ul>
+          <li><a routerLink="/branches">Head Office: Upper Hill, Nairobi</a></li>
+          <li><a href="tel:+254700000000">Phone: +254 700 000 000</a></li>
+          <li><a href="mailto:support@alexiafinancials.com">Email: support@alexiafinancials.com</a></li>
+          <li><a routerLink="/branches">Locate a Branch</a></li>
+          <li><a routerLink="/faq">Frequently Asked Questions</a></li>
+          <li><a routerLink="/contact">Send a Message</a></li>
+        </ul>
+      </div>
     </div>
   </div>
+
+  <div class="footer-regulatory">
+    <div class="container">
+      <p><i class="fa-solid fa-scale-balanced"></i> Alexia Financials is regulated by the Central Bank of Kenya and is a member of the Kenya Deposit Insurance Corporation (KDIC).</p>
+      <div class="legal-links">
+        <a routerLink="/security">Privacy Policy</a> |
+        <a routerLink="/security">Terms &amp; Conditions</a> |
+        <a routerLink="/security">Security Center</a> |
+        <a routerLink="/contact">Complaints</a>
+      </div>
+    </div>
+  </div>
+
   <div class="footer-bottom">
-    <div class="container">&copy; 2026 Alexia Financials. All rights reserved.</div>
+    <div class="container">
+      <div class="bottom-content">
+        <span>&copy; 2026 Alexia Financials PLC. All rights reserved.</span>
+        <span class="security-stamp"><i class="fa-solid fa-lock"></i> Secure Banking Grade SSL</span>
+      </div>
+    </div>
   </div>
 </footer>

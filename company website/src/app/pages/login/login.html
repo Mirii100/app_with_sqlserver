@@ -1,0 +1,49 @@
+<section class="page-hero auth-hero">
+  <div class="container">
+    <h1>Member Login</h1>
+    <p class="subtitle">Welcome back — access your account securely.</p>
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Login</div>
+  </div>
+</section>
+
+<div class="container py-xl login-layout">
+  <div class="card login-card">
+    <div class="login-logo">
+      <span class="logo-text">Alexia</span><span class="logo-sub">Financials</span>
+    </div>
+    <h2>Log in to your account</h2>
+    <p class="login-sub">Use your registered email or username and password.</p>
+
+    <div class="server-error" *ngIf="serverError">
+      <i class="fa-solid fa-circle-exclamation"></i> {{ serverError }}
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="identifier">Email or Username</label>
+        <input type="text" id="identifier" formControlName="identifier" placeholder="e.g. jane@example.com" autocomplete="username" />
+        <div class="error" *ngIf="loginForm.get('identifier')?.touched && loginForm.get('identifier')?.invalid">Enter your email or username</div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" formControlName="password" placeholder="Your password" autocomplete="current-password" />
+        <div class="error" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">Enter your password</div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block submit-btn" [disabled]="submitting">
+        <span *ngIf="submitting"><i class="fa-solid fa-spinner fa-spin"></i> Logging in...</span>
+        <span *ngIf="!submitting"><i class="fa-solid fa-right-to-bracket"></i> Log In</span>
+      </button>
+    </form>
+
+    <div class="login-links">
+      <a routerLink="/signup" class="text-link">New member? Open an account</a>
+    </div>
+
+    <div class="login-help">
+      <p><i class="fa-solid fa-lock"></i> Your session is protected with banking-grade encryption.</p>
+      <p>Forgot your password or need help? <a routerLink="/contact">Contact support</a>.</p>
+    </div>
+  </div>
+</div>

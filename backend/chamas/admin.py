@@ -1,6 +1,8 @@
 from django.contrib import admin
+from django.shortcuts import render
+from django.urls import path
+from django.db.models import Sum
 from .models import Chama, ChamaMembership
-
 
 class ChamaMembershipInline(admin.TabularInline):
     model = ChamaMembership
@@ -14,6 +16,7 @@ class ChamaMembershipInline(admin.TabularInline):
 
 @admin.register(Chama)
 class ChamaAdmin(admin.ModelAdmin):
+    change_list_template = 'admin/chamas/chama_changelist.html'
     list_display = (
         'id',
         'name',
@@ -49,6 +52,24 @@ class ChamaAdmin(admin.ModelAdmin):
     ordering = ('-created_at',)
     list_per_page = 25
     inlines = (ChamaMembershipInline,)
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path('report/', self.admin_site.admin_view(self.report_view), name='chamas_report'),
+        ]
+        return custom + urls
+
+    def report_view(self, request):
+        chamas = Chama.objects.all()
+        by_status = chamas.values('status').annotate(total=Sum('total_pool_balance'))
+        
+        context = self.admin_site.each_context(request)
+        context.update({
+            'title': 'Chama Analytics',
+            'by_status': list(by_status),
+        })
+        return render(request, 'admin/chamas/report.html', context)
 
 
 @admin.register(ChamaMembership)

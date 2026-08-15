@@ -23,8 +23,23 @@ class TransactionAdmin(admin.ModelAdmin, ExportCsvMixin):
         urls = super().get_urls()
         custom = [
             path('ledger/', self.admin_site.admin_view(self.ledger_view), name='transactions_ledger'),
+            path('report/', self.admin_site.admin_view(self.report_view), name='transactions_report'),
         ]
         return custom + urls
+
+    def report_view(self, request):
+        from django.db.models import Sum
+        rows = Transaction.objects.all()
+        by_type = rows.values('type').annotate(total=Sum('amount'))
+        by_cat = rows.values('category').annotate(total=Sum('amount'))
+        
+        context = self.admin_site.each_context(request)
+        context.update({
+            'title': 'Transaction Analytics',
+            'by_type': list(by_type),
+            'by_cat': list(by_cat),
+        })
+        return render(request, 'admin/transactions/report.html', context)
 
     def ledger_view(self, request):
         queryset = Transaction.objects.all()

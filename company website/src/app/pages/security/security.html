@@ -1,0 +1,46 @@
+<section class="page-hero">
+  <div class="container">
+    <h1>Security Center</h1>
+    <p class="subtitle">Your money, your data and your identity are our top priority.</p>
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Security Center</div>
+  </div>
+</section>
+
+<div class="container py-xl">
+  <div class="section-heading">
+    <span class="section-tag">How We Protect You</span>
+    <h2>Security built into everything we do</h2>
+    <p>Multiple layers of protection keep your money and information safe.</p>
+  </div>
+
+  <div class="security-grid">
+    <div class="security-item card" *ngFor="let p of protections">
+      <div class="feature-icon"><i class="{{ p.icon }}"></i></div>
+      <h3>{{ p.title }}</h3>
+      <p>{{ p.desc }}</p>
+    </div>
+  </div>
+
+  <div class="security-tips card">
+    <div class="tips-header">
+      <div class="feature-icon gold"><i class="fa-solid fa-lightbulb"></i></div>
+      <div>
+        <h3>Stay safe with these simple habits</h3>
+        <p>Protecting your account starts with you.</p>
+      </div>
+    </div>
+    <ul class="checklist">
+      <li *ngFor="let tip of tips"><i class="fa-solid fa-shield-halved"></i> {{ tip }}</li>
+    </ul>
+  </div>
+
+  <div class="notice danger">
+    <h4><i class="fa-solid fa-triangle-exclamation"></i> Reporting fraud</h4>
+    <p>Suspicious activity or a suspected scam? Call us immediately on <strong>+254 700 000 000</strong> (24/7) or email <strong>fraud@alexiafinancials.com</strong>. The sooner you report, the faster we can act to protect your funds.</p>
+  </div>
+
+  <div class="text-center mt-xl">
+    <a routerLink="/contact" class="btn btn-primary">Contact Support</a>
+    <a routerLink="/faq" class="btn btn-outline">Security FAQ</a>
+  </div>
+</div>

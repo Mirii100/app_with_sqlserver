@@ -1,0 +1,75 @@
+<section class="page-hero">
+  <div class="container">
+    <h1>Loans &amp; Credit</h1>
+    <p class="subtitle">Fast, fair and flexible financing for individuals, businesses and chamas.</p>
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Loans</div>
+  </div>
+</section>
+
+<div class="container py-xl">
+  <div class="section-heading">
+    <span class="section-tag">Our Loan Products</span>
+    <h2>Find the right loan for your goals</h2>
+    <p>Competitive rates, transparent terms and decisions within 48 hours.</p>
+  </div>
+
+  <div class="loans-grid">
+    <div class="loan-card card" *ngFor="let loan of loans" [class.featured]="loan.featured">
+      <div class="loan-top">
+        <div class="loan-icon"><i class="{{ loan.icon }}"></i></div>
+        <span class="pill gold" *ngIf="loan.featured">Most Popular</span>
+      </div>
+      <h3>{{ loan.name }}</h3>
+      <p class="loan-desc">{{ loan.description }}</p>
+
+      <div class="loan-meta">
+        <div class="meta-item">
+          <span class="meta-lbl">Interest Rate</span>
+          <span class="meta-val">{{ loan.rate }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-lbl">Maximum Amount</span>
+          <span class="meta-val">{{ loan.amount }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-lbl">Tenure</span>
+          <span class="meta-val">{{ loan.tenure }}</span>
+        </div>
+      </div>
+
+      <ul class="checklist">
+        <li *ngFor="let f of loan.features"><i class="fa-solid fa-check"></i> {{ f }}</li>
+      </ul>
+
+      <a routerLink="/contact" class="btn btn-primary btn-block">Apply Now</a>
+    </div>
+  </div>
+
+  <div class="eligibility-section mt-xl">
+    <div class="eligibility-card card">
+      <div class="feature-icon gold"><i class="fa-solid fa-clipboard-check"></i></div>
+      <h3>What you need to apply</h3>
+      <ul class="checklist">
+        <li *ngFor="let e of eligibility"><i class="fa-solid fa-check"></i> {{ e }}</li>
+      </ul>
+      <a routerLink="/contact" class="btn btn-primary">Talk to a Loan Officer</a>
+    </div>
+
+    <div class="loan-steps">
+      <div class="section-tag">How it works</div>
+      <h3>From application to disbursement in 4 steps</h3>
+      <div class="loan-step" *ngFor="let s of steps; let i = index">
+        <span class="step-num">{{ i + 1 }}</span>
+        <div>
+          <strong>{{ s.title }}</strong>
+          <p>{{ s.desc }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice">
+    <h4><i class="fa-solid fa-scale-balanced"></i> Responsible lending</h4>
+    <p>All loans are subject to credit assessment. We practice responsible lending and encourage you to borrow only what you can comfortably repay. Rates and amounts shown are indicative and subject to approval.</p>
+  </div>
+</div>
