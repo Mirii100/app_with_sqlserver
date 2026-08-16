@@ -25,6 +25,7 @@ from stocks.views import StockViewSet
 from support.views import SupportTicketViewSet
 from rewards.views import RewardViewSet
 from insights.views import FinancialAdviceViewSet
+from mpesa.views import STKPushViewSet, mpesa_callback
 from django.contrib import admin
 router = routers.DefaultRouter()
 router.register(r"accounts", AccountViewSet)
@@ -50,6 +51,7 @@ router.register(r"stocks", StockViewSet, basename='stock')
 router.register(r"support-tickets", SupportTicketViewSet, basename='support-ticket')
 router.register(r"rewards", RewardViewSet, basename='reward')
 router.register(r"financial-advice", FinancialAdviceViewSet, basename='financial-advice')
+router.register(r"mpesa", STKPushViewSet, basename='mpesa')
 
 urlpatterns = [
     path("api/", include(router.urls)),
@@ -73,6 +75,7 @@ urlpatterns = [
     path("api/transfer-loan-to-main/", transfer_loan_to_main),
     path("api/transfer-to-chama-wallet/", transfer_to_chama_wallet),
     path("api/transfer-to-goal-wallet/", transfer_to_goal_wallet),
+    path("api/mpesa/callback/", mpesa_callback, name="mpesa-callback"),
     path(
         "admin/send-statements/",
         admin.site.admin_view(send_statements_view),

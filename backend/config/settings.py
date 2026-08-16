@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     'support',
     'rewards',
     'insights',
+    'mpesa',
 ]
 
 
@@ -226,6 +227,15 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get(
     'DEFAULT_FROM_EMAIL', 'Alexia Financials <njugunaalekii99@gmail.com>')
+
+# M-Pesa Daraja API
+MPESA_ENVIRONMENT = os.environ.get('MPESA_ENVIRONMENT', 'sandbox')
+MPESA_CONSUMER_KEY = os.environ.get('MPESA_CONSUMER_KEY', '')
+MPESA_CONSUMER_SECRET = os.environ.get('MPESA_CONSUMER_SECRET', '')
+MPESA_SHORTCODE = os.environ.get('MPESA_SHORTCODE', '')
+MPESA_PASSKEY = os.environ.get('MPESA_PASSKEY', '')
+MPESA_CALLBACK_URL = os.environ.get(
+    'MPESA_CALLBACK_URL', 'https://yourdomain.com/mpesa/callback/')
 
 # REST Framework
 REST_FRAMEWORK = {

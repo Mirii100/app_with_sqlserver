@@ -1,6 +1,13 @@
 from django.contrib import admin
+from django.contrib import messages
+
 from .models import User, SecuritySettings, OtpCode
 from . import admin_analytics
+from .utils import (
+    find_users_with_incomplete_profiles,
+    notify_user_incomplete_profile,
+)
+
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
@@ -77,6 +84,36 @@ class UserAdmin(admin.ModelAdmin):
     )
     ordering = ('-date_joined',)
     list_per_page = 25
+    actions = ['send_profile_completion_notifications']
+
+    @admin.action(
+        description='Send profile completion notifications to selected users',
+    )
+    def send_profile_completion_notifications(self, request, queryset):
+        """Send a reminder email (and in-app notification) to each selected
+        user that has incomplete profile data."""
+        results = find_users_with_incomplete_profiles(queryset)
+        sent = 0
+        for result in results:
+            try:
+                if notify_user_incomplete_profile(
+                    result.user, result.missing_labels, dry_run=False
+                ):
+                    sent += 1
+            except Exception:
+                messages.error(
+                    request,
+                    f'Failed to notify {result.user.email}',
+                )
+        total_incomplete = len(results)
+        total_selected = queryset.count()
+        complete = total_selected - total_incomplete
+        messages.success(
+            request,
+            f'Sent notifications to {sent} user(s) with incomplete '
+            f'profiles ({complete} selected user(s) already had '
+            f'complete profiles).',
+        )
 
 
 @admin.register(SecuritySettings)
