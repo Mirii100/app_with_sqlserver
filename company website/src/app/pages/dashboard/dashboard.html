@@ -1,0 +1,154 @@
+<section class="dash-hero">
+  <div class="container dash-hero-inner">
+    <div>
+      <p class="dash-greet">{{ greeting() }},</p>
+      <h1>{{ firstName() }} <span class="wave">👋</span></h1>
+      <p class="dash-date">{{ today | date: 'EEEE, d MMMM y' }}</p>
+    </div>
+    <div class="dash-hero-actions">
+      <a routerLink="/account" class="btn btn-outline-light btn-sm">
+        <i class="fa-solid fa-circle-user"></i> Profile
+      </a>
+      <button class="btn btn-gold btn-sm" (click)="logout()">
+        <i class="fa-solid fa-right-from-bracket"></i> Log Out
+      </button>
+    </div>
+  </div>
+</section>
+
+<div class="container py-xl">
+  <div class="load-error notice danger" *ngIf="loadError">
+    <h4><i class="fa-solid fa-triangle-exclamation"></i> Something went wrong</h4>
+    <p>{{ loadError }}</p>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-xl">
+    <i class="fa-solid fa-spinner fa-spin loading-icon"></i>
+    <p>Preparing your dashboard...</p>
+  </div>
+
+  <ng-container *ngIf="!loading && user && !loadError">
+    <!-- Balance + wallets -->
+    <div class="dash-top">
+      <div class="balance-card">
+        <div class="balance-head">
+          <span class="balance-lbl"><i class="fa-solid fa-wallet"></i> Main Account</span>
+          <button class="eye-btn" (click)="toggleBalances()" [attr.aria-label]="hideBalances ? 'Show balances' : 'Hide balances'">
+            <i class="fa-solid" [class.fa-eye]="hideBalances" [class.fa-eye-slash]="!hideBalances"></i>
+          </button>
+        </div>
+        <span class="balance-val" *ngIf="!hideBalances; else hiddenBal">{{ formatMoney(user.balance) }}</span>
+        <ng-template #hiddenBal><span class="balance-val">KES ••••••</span></ng-template>
+        <div class="balance-foot">
+          <span class="acc-chip"><i class="fa-solid fa-building-columns"></i> {{ maskedAccount() }}</span>
+          <span class="acc-chip gold-chip"><i class="fa-solid fa-star"></i> {{ user.points ?? 0 }} pts</span>
+        </div>
+      </div>
+
+      <div class="wallet-grid">
+        <div class="wallet-card card">
+          <span class="wallet-lbl"><i class="fa-solid fa-hand-holding-dollar"></i> Loan Wallet</span>
+          <span class="wallet-val">{{ hideBalances ? '••••' : formatMoney(user.loan_wallet_balance) }}</span>
+          <span class="wallet-sub">Limit {{ formatMoney(user.loan_limit) }}</span>
+        </div>
+        <div class="wallet-card card">
+          <span class="wallet-lbl"><i class="fa-solid fa-people-group"></i> Chama Wallet</span>
+          <span class="wallet-val">{{ hideBalances ? '••••' : formatMoney(user.chama_wallet_balance) }}</span>
+        </div>
+        <div class="wallet-card card">
+          <span class="wallet-lbl"><i class="fa-solid fa-bullseye"></i> Goal Wallet</span>
+          <span class="wallet-val">{{ hideBalances ? '••••' : formatMoney(user.goal_wallet_balance) }}</span>
+        </div>
+        <div class="wallet-card card accent">
+          <span class="wallet-lbl"><i class="fa-solid fa-sack-dollar"></i> Loan Used</span>
+          <span class="wallet-val">{{ hideBalances ? '••••' : formatMoney(user.loan_used) }}</span>
+          <span class="wallet-sub">of {{ formatMoney(user.loan_limit) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <h2 class="section-heading"><span>Quick Actions</span></h2>
+    <div class="quick-grid">
+      <a routerLink="/loans" class="quick-tile card">
+        <span class="feature-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+        <span class="quick-title">Apply for a Loan</span>
+        <span class="quick-desc">Up to KES 500,000 in minutes</span>
+      </a>
+      <a routerLink="/services" class="quick-tile card">
+        <span class="feature-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+        <span class="quick-title">Pay a Bill</span>
+        <span class="quick-desc">Utilities, airtime & more</span>
+      </a>
+      <a routerLink="/rates" class="quick-tile card">
+        <span class="feature-icon"><i class="fa-solid fa-percent"></i></span>
+        <span class="quick-title">FX & Rates</span>
+        <span class="quick-desc">Live exchange rates</span>
+      </a>
+      <a routerLink="/invest" class="quick-tile card">
+        <span class="feature-icon"><i class="fa-solid fa-chart-line"></i></span>
+        <span class="quick-title">Invest & Grow</span>
+        <span class="quick-desc">Fixed deposits & funds</span>
+      </a>
+      <a routerLink="/insurance" class="quick-tile card">
+        <span class="feature-icon"><i class="fa-solid fa-shield-halved"></i></span>
+        <span class="quick-title">Insurance</span>
+        <span class="quick-desc">Cover what matters</span>
+      </a>
+      <a routerLink="/contact" class="quick-tile card">
+        <span class="feature-icon"><i class="fa-solid fa-headset"></i></span>
+        <span class="quick-title">Get Support</span>
+        <span class="quick-desc">We're here 24/7</span>
+      </a>
+    </div>
+
+    <!-- Recent activity -->
+    <div class="activity-row">
+      <div class="activity-card card">
+        <div class="activity-head">
+          <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h3>
+          <span class="badge-soft">Last {{ transactions.length || 0 }}</span>
+        </div>
+
+        <div *ngIf="txnsLoading" class="text-center py-lg">
+          <i class="fa-solid fa-spinner fa-spin loading-icon"></i>
+        </div>
+
+        <p *ngIf="!txnsLoading && transactions.length === 0" class="empty-note">
+          <i class="fa-solid fa-inbox"></i> No transactions yet. Your deposits, transfers and payments will appear here.
+        </p>
+
+        <ul class="txn-list" *ngIf="!txnsLoading && transactions.length > 0">
+          <li *ngFor="let t of transactions">
+            <span class="txn-icon"><i class="fa-solid" [ngClass]="txnIcon(t)"></i></span>
+            <span class="txn-info">
+              <span class="txn-desc">{{ t.description || (t.category | titlecase) }}</span>
+              <span class="txn-meta">{{ t.date | date: 'd MMM y, h:mm a' }} · {{ t.reference || '—' }}</span>
+            </span>
+            <span class="txn-amt" [class.neg]="t.type === 'withdrawal'" [class.pos]="t.type !== 'withdrawal'">
+              {{ txnAmount(t) }}
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <aside class="member-card card">
+        <div class="avatar avatar-lg">{{ (user.full_name || user.email || 'U')[0].toUpperCase() }}</div>
+        <h3>{{ user.full_name || 'Member' }}</h3>
+        <p class="member-mail">{{ user.email }}</p>
+        <div class="member-meta">
+          <div><span class="meta-lbl">Member No.</span><span class="meta-val">{{ maskedAccount() }}</span></div>
+          <div><span class="meta-lbl">Phone</span><span class="meta-val">{{ user.phone_number || '—' }}</span></div>
+          <div><span class="meta-lbl">Referral Code</span><span class="meta-val referral">{{ user.referral_code || '—' }}</span></div>
+        </div>
+        <a routerLink="/account" class="btn btn-outline btn-block">
+          <i class="fa-solid fa-user-pen"></i> Manage Profile
+        </a>
+        <p class="app-hint">
+          <i class="fa-solid fa-mobile-screen-button"></i>
+          Move money instantly with the Alexia-Pesa mobile app — QR payments, cheques, FX & crypto.
+        </p>
+      </aside>
+    </div>
+  </ng-container>
+</div>

@@ -12,13 +12,20 @@ import { News } from './pages/news/news';
 import { Contact } from './pages/contact/contact';
 import { Signup } from './pages/signup/signup';
 import { Login } from './pages/login/login';
+import { Dashboard } from './pages/dashboard/dashboard';
 import { Account } from './pages/account/account';
+import { Invest } from './pages/invest/invest';
+import { Insurance } from './pages/insurance/insurance';
+import { DigitalBanking } from './pages/digital-banking/digital-banking';
 
 export const routes: Routes = [
   { path: '', component: Home },
   { path: 'about', component: About },
   { path: 'services', component: Services },
   { path: 'loans', component: Loans },
+  { path: 'invest', component: Invest },
+  { path: 'insurance', component: Insurance },
+  { path: 'digital-banking', component: DigitalBanking },
   { path: 'rates', component: Rates },
   { path: 'security', component: Security },
   { path: 'careers', component: Careers },
@@ -28,6 +35,7 @@ export const routes: Routes = [
   { path: 'contact', component: Contact },
   { path: 'signup', component: Signup },
   { path: 'login', component: Login },
+  { path: 'dashboard', component: Dashboard },
   { path: 'account', component: Account },
   { path: '**', redirectTo: '' }
 ];

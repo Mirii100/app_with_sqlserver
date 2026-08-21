@@ -14,8 +14,13 @@ from transactions.views import (
     BillerCategoryViewSet,
     BillPaymentViewSet,
     ReportViewSet,
+    ChequeBookRequestViewSet,
+    StopPaymentOrderViewSet,
+    FxViewSet,
+    CryptoViewSet,
+    ChequeViewSet,
 )
-from core.views import signup, login, UserDetailView, UserSecuritySettingsView, SecuritySettingsViewSet, transfer_loan_to_main, transfer_to_chama_wallet, transfer_to_goal_wallet, change_password, request_otp, verify_otp, email_statement, email_stock_statement, email_loan_statement
+from core.views import signup, login, UserDetailView, UserSecuritySettingsView, SecuritySettingsViewSet, PaymentQrCodeViewSet, transfer_loan_to_main, transfer_to_chama_wallet, transfer_to_goal_wallet, change_password, request_otp, verify_otp, email_statement, email_stock_statement, email_loan_statement
 from core.admin_statements import send_statements_view
 from loans.views import LoanViewSet, LoanProductViewSet
 from notifications.views import NotificationViewSet
@@ -42,6 +47,12 @@ router.register(r"user-loan-limits", UserLoanLimitViewSet)
 router.register(r"biller-categories", BillerCategoryViewSet)
 router.register(r"bill-payments", BillPaymentViewSet, basename='bill-payment')
 router.register(r"security-settings", SecuritySettingsViewSet)
+router.register(r"payment-qr", PaymentQrCodeViewSet, basename='payment-qr')
+router.register(r"cheque-book-requests", ChequeBookRequestViewSet, basename='cheque-book-request')
+router.register(r"stop-payment-orders", StopPaymentOrderViewSet, basename='stop-payment-order')
+router.register(r"fx", FxViewSet, basename='fx')
+router.register(r"crypto", CryptoViewSet, basename='crypto')
+router.register(r"cheques", ChequeViewSet, basename='cheque')
 router.register(r"loans", LoanViewSet)
 router.register(r"loan-products", LoanProductViewSet)
 router.register(r"notifications", NotificationViewSet)

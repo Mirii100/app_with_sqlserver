@@ -40,6 +40,11 @@ export class Header implements OnInit, OnDestroy {
   }
 
   toggleDropdown(id: string) {
+    // Desktop dropdowns open on hover; the tap/click toggle is for the mobile drawer only.
+    if (typeof window !== 'undefined' && window.innerWidth > 920) {
+      this.activeDropdown = null;
+      return;
+    }
     this.activeDropdown = this.activeDropdown === id ? null : id;
   }
 

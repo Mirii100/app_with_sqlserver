@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, SecuritySettings
+from .models import User, SecuritySettings, PaymentQrCode
 
 class UserSignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -89,6 +89,17 @@ class UserSerializer(serializers.ModelSerializer):
             security_settings.biometric_enabled = biometric_enabled
             security_settings.save()
         return instance
+
+class PaymentQrCodeSerializer(serializers.ModelSerializer):
+    owner_name = serializers.CharField(source='user.full_name', read_only=True)
+    account_number = serializers.CharField(source='user.account_number', read_only=True)
+
+    class Meta:
+        model = PaymentQrCode
+        fields = ['id', 'token', 'payload', 'is_active', 'owner_name',
+                  'account_number', 'created_at', 'updated_at']
+        read_only_fields = ['token', 'payload', 'created_at', 'updated_at']
+
 
 class SecuritySettingsSerializer(serializers.ModelSerializer):
     class Meta:

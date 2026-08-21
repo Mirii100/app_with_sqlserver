@@ -1,4 +1,4 @@
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -9,8 +9,8 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
 
-from .serializers import UserSignupSerializer ,UserSerializer, SecuritySettingsSerializer
-from .models import User, SecuritySettings, OtpCode
+from .serializers import UserSignupSerializer ,UserSerializer, SecuritySettingsSerializer, PaymentQrCodeSerializer
+from .models import User, SecuritySettings, OtpCode, PaymentQrCode
 from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
@@ -21,6 +21,7 @@ from datetime import timedelta
 
 import logging
 import random
+import string
 
 from decimal import Decimal, InvalidOperation
 
@@ -249,6 +250,11 @@ def login(request):
     ip_address = _get_client_ip(request)
 
     user = authenticate(username=email, password=password)
+    if user is None and email:
+        # Allow signing in with the email address as well as the username.
+        match = User.objects.filter(email__iexact=str(email).strip()).first()
+        if match:
+            user = authenticate(username=match.username, password=password)
     if user:
         token, created = Token.objects.get_or_create(user=user)
 
@@ -341,6 +347,170 @@ class SecuritySettingsViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         serializer.save()
+
+
+class PaymentQrCodeViewSet(viewsets.GenericViewSet):
+    """Payment QR records.
+
+    * ``GET payment-qr/me/``              – fetch (or lazily create) the caller's QR.
+    * ``GET payment-qr/resolve/<token>/`` – resolve a scanned token to the
+      payee's display info (no sensitive fields are returned).
+    * ``POST payment-qr/pay/``            – authenticated user-to-user payment
+      against a scanned token.
+    """
+    queryset = PaymentQrCode.objects.filter(is_active=True)
+    serializer_class = PaymentQrCodeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def _get_or_create_for_user(self, user):
+        qr, _created = PaymentQrCode.objects.get_or_create(user=user)
+        # Keep the stored payload in sync with any profile changes.
+        if qr.payload != qr.build_payload():
+            qr.refresh_payload()
+        return qr
+
+    @action(detail=False, methods=['get'], url_path='me')
+    def me(self, request):
+        qr = self._get_or_create_for_user(request.user)
+        serializer = self.get_serializer(qr)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path='resolve/(?P<token>[^/.]+)', permission_classes=[AllowAny])
+    def resolve(self, request, token=None):
+        qr = get_object_or_404(
+            PaymentQrCode, token=token, is_active=True)
+        payee = qr.user
+        account_number = getattr(payee, 'account_number', '') or ''
+        return Response({
+            'token': qr.token,
+            'name': payee.full_name or payee.username,
+            'account_masked': '•• ' + account_number[-4:] if len(account_number) >= 4 else '',
+            'userId': str(payee.pk),
+        })
+
+    @staticmethod
+    def _masked_account(account_number):
+        account_number = account_number or ''
+        return '•• ' + account_number[-4:] if len(account_number) >= 4 else ''
+
+    @action(detail=False, methods=['post'], url_path='pay')
+    def pay(self, request):
+        """Move money from ``request.user`` to the owner of a scanned token.
+
+        Body: ``{"token": "KESHPAY-XXXXXXXX", "amount": 250.00}``
+
+        Charges mirror bill payments (tiered broker fee + government tax).
+        Everything runs in one DB transaction: payer is debited the gross
+        amount, payee is credited the net amount, paired debit/deposit
+        transactions are recorded and company revenue charges captured.
+        """
+        from stocks.fees import compute_tiered_charges, record_charges, _money
+
+        token = str(request.data.get('token') or '').strip()
+        raw_amount = request.data.get('amount')
+
+        if not token or raw_amount is None:
+            return Response(
+                {'error': 'token and amount are required'},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            amount_value = Decimal(str(raw_amount))
+        except (InvalidOperation, ValueError):
+            return Response(
+                {'error': 'Invalid amount'},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        if amount_value <= 0:
+            return Response(
+                {'error': 'Amount must be greater than zero'},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            qr = PaymentQrCode.objects.select_related('user').get(
+                token=token, is_active=True)
+        except PaymentQrCode.DoesNotExist:
+            return Response(
+                {'error': 'Unknown merchant code'},
+                status=status.HTTP_404_NOT_FOUND)
+
+        payer = request.user
+        payee = qr.user
+        if payee.pk == payer.pk:
+            return Response(
+                {'error': 'You cannot pay your own QR code'},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        broker_fee, gov_tax, broker_rate, tax_rate = compute_tiered_charges(amount_value)
+        total_deduction = _money(amount_value + broker_fee + gov_tax)
+        net_to_payee = amount_value
+
+        if payer.balance < total_deduction:
+            return Response(
+                {'error': f'Insufficient balance. KSh {_money(broker_fee + gov_tax)} '
+                          'in charges apply.',
+                 'broker_fee': str(broker_fee),
+                 'government_tax': str(gov_tax),
+                 'total_charges': str(_money(broker_fee + gov_tax))},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        payee_name = payee.full_name or payee.username
+        payer_name = payer.full_name or payer.username
+        reference = 'QR' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+
+        with transaction.atomic():
+            User.objects.filter(pk=payer.pk).update(
+                balance=F('balance') - total_deduction)
+            User.objects.filter(pk=payee.pk).update(
+                balance=F('balance') + net_to_payee)
+
+            debit_txn = Transaction.objects.create(
+                user=payer,
+                amount=total_deduction,
+                broker_fee=broker_fee,
+                government_tax=gov_tax,
+                category='qr_payment',
+                type='withdrawal',
+                description=(
+                    f'QR payment to {payee_name} • {reference} '
+                    f'(KSh {_money(amount_value)} + charges KSh {_money(broker_fee + gov_tax)})'
+                ),
+                date=timezone.now(),
+            )
+            Transaction.objects.create(
+                user=payee,
+                amount=net_to_payee,
+                broker_fee=Decimal('0.00'),
+                government_tax=Decimal('0.00'),
+                category='qr_payment',
+                type='deposit',
+                description=f'QR payment from {payer_name} • {reference}',
+                date=timezone.now(),
+            )
+
+            record_charges(
+                payer, 'qr_payment', 'qr_payment', debit_txn, amount_value,
+                account_number=payer.account_number,
+                broker_fee=broker_fee, gov_tax=gov_tax,
+                broker_rate=broker_rate, tax_rate=tax_rate,
+            )
+
+        payer.refresh_from_db(fields=['balance'])
+        payee.refresh_from_db(fields=['balance'])
+
+        return Response({
+            'status': 'success',
+            'reference': reference,
+            'payee_name': payee_name,
+            'payee_account_masked': self._masked_account(payee.account_number),
+            'payer_account_masked': self._masked_account(payer.account_number),
+            'amount': str(_money(amount_value)),
+            'broker_fee': str(broker_fee),
+            'government_tax': str(gov_tax),
+            'total_charges': str(_money(broker_fee + gov_tax)),
+            'total_deducted': str(total_deduction),
+            'payer_balance': str(_money(payer.balance)),
+        }, status=status.HTTP_201_CREATED)
 
 
 OTP_EXPIRY_MINUTES = 10

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib import messages
 
-from .models import User, SecuritySettings, OtpCode
+from .models import User, SecuritySettings, OtpCode, PaymentQrCode
 from . import admin_analytics
 from .utils import (
     find_users_with_incomplete_profiles,
@@ -138,6 +138,25 @@ class SecuritySettingsAdmin(admin.ModelAdmin):
     list_per_page = 25
 
 
+@admin.register(PaymentQrCode)
+class PaymentQrCodeAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'user',
+        'token',
+        'is_active',
+        'created_at',
+        'updated_at',
+    )
+    search_fields = (
+        'user__username',
+        'user__email',
+        'user__account_number',
+        'token',
+    )
+    readonly_fields = ('token', 'payload', 'created_at', 'updated_at')
+    list_select_related = ('user',)
+    list_per_page = 25
 @admin.register(OtpCode)
 class OtpCodeAdmin(admin.ModelAdmin):
     list_display = (

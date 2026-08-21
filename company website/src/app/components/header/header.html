@@ -29,7 +29,7 @@
       <ul class="nav-links">
         <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMenu()">Home</a></li>
 
-        <li class="dropdown">
+        <li class="dropdown" [class.open]="activeDropdown === 'services'">
           <a routerLink="/services" routerLinkActive="active" (click)="toggleDropdown('services')">
             Banking &amp; Services <i class="fa-solid fa-chevron-down dropdown-caret"></i>
           </a>
@@ -42,7 +42,7 @@
           </ul>
         </li>
 
-        <li class="dropdown">
+        <li class="dropdown" [class.open]="activeDropdown === 'loans'">
           <a routerLink="/loans" routerLinkActive="active" (click)="toggleDropdown('loans')">
             Loans <i class="fa-solid fa-chevron-down dropdown-caret"></i>
           </a>
@@ -54,9 +54,48 @@
           </ul>
         </li>
 
+        <li class="dropdown" [class.open]="activeDropdown === 'invest'">
+          <a routerLink="/invest" routerLinkActive="active" (click)="toggleDropdown('invest')">
+            Invest <i class="fa-solid fa-chevron-down dropdown-caret"></i>
+          </a>
+          <ul class="dropdown-menu" [class.open]="activeDropdown === 'invest'">
+            <li><a routerLink="/invest" (click)="closeMenu()"><i class="fa-solid fa-vault"></i> Fixed Deposits</a></li>
+            <li><a routerLink="/invest" (click)="closeMenu()"><i class="fa-solid fa-chart-pie"></i> Unit Trusts &amp; Funds</a></li>
+            <li><a routerLink="/invest" (click)="closeMenu()"><i class="fa-solid fa-bitcoin-sign"></i> Shares &amp; Crypto</a></li>
+            <li><a routerLink="/invest" (click)="closeMenu()"><i class="fa-solid fa-umbrella-beach"></i> Retirement Plans</a></li>
+            <li><a routerLink="/rates" (click)="closeMenu()"><i class="fa-solid fa-percent"></i> Current Rates</a></li>
+          </ul>
+        </li>
+
+        <li class="dropdown" [class.open]="activeDropdown === 'insurance'">
+          <a routerLink="/insurance" routerLinkActive="active" (click)="toggleDropdown('insurance')">
+            Insurance <i class="fa-solid fa-chevron-down dropdown-caret"></i>
+          </a>
+          <ul class="dropdown-menu" [class.open]="activeDropdown === 'insurance'">
+            <li><a routerLink="/insurance" (click)="closeMenu()"><i class="fa-solid fa-heart-pulse"></i> Life Cover</a></li>
+            <li><a routerLink="/insurance" (click)="closeMenu()"><i class="fa-solid fa-hands-holding-circle"></i> Funeral Cover</a></li>
+            <li><a routerLink="/insurance" (click)="closeMenu()"><i class="fa-solid fa-car"></i> Asset &amp; Motor</a></li>
+            <li><a routerLink="/insurance" (click)="closeMenu()"><i class="fa-solid fa-store"></i> Business Insurance</a></li>
+            <li><a routerLink="/insurance" (click)="closeMenu()"><i class="fa-solid fa-plane"></i> Travel &amp; Health</a></li>
+          </ul>
+        </li>
+
+        <li class="dropdown" [class.open]="activeDropdown === 'ways-to-bank'">
+          <a routerLink="/digital-banking" routerLinkActive="active" (click)="toggleDropdown('ways-to-bank')">
+            Ways to Bank <i class="fa-solid fa-chevron-down dropdown-caret"></i>
+          </a>
+          <ul class="dropdown-menu" [class.open]="activeDropdown === 'ways-to-bank'">
+            <li><a routerLink="/digital-banking" (click)="closeMenu()"><i class="fa-solid fa-mobile-screen-button"></i> Alexia-Pesa App</a></li>
+            <li><a routerLink="/digital-banking" (click)="closeMenu()"><i class="fa-solid fa-qrcode"></i> QR Payments</a></li>
+            <li><a routerLink="/digital-banking" (click)="closeMenu()"><i class="fa-solid fa-money-check"></i> Digital Cheques</a></li>
+            <li><a routerLink="/digital-banking" (click)="closeMenu()"><i class="fa-solid fa-money-bill-transfer"></i> Cardless ATM Withdrawals</a></li>
+            <li><a routerLink="/branches" (click)="closeMenu()"><i class="fa-solid fa-store"></i> Agents &amp; Branches</a></li>
+          </ul>
+        </li>
+
         <li><a routerLink="/rates" routerLinkActive="active" (click)="closeMenu()">Rates</a></li>
 
-        <li class="dropdown">
+        <li class="dropdown" [class.open]="activeDropdown === 'resources'">
           <a (click)="toggleDropdown('resources')" class="no-link">
             Resources <i class="fa-solid fa-chevron-down dropdown-caret"></i>
           </a>
@@ -70,8 +109,11 @@
           </ul>
         </li>
 
+        <li><a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">About Us</a></li>
+        <li><a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">Contact</a></li>
+
         <li *ngIf="!isAuthenticated()"><a routerLink="/login" routerLinkActive="active" (click)="closeMenu()">Login</a></li>
-        <li *ngIf="isAuthenticated()"><a routerLink="/account" routerLinkActive="active" (click)="closeMenu()"><i class="fa-solid fa-circle-user"></i> My Account</a></li>
+        <li *ngIf="isAuthenticated()"><a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
         <li><a routerLink="/signup" (click)="closeMenu()" class="btn btn-primary btn-sm nav-cta">Open an Account</a></li>
       </ul>
     </nav>

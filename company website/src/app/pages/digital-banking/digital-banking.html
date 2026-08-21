@@ -1,0 +1,61 @@
+<section class="page-hero">
+  <div class="container">
+    <h1>Ways to Bank</h1>
+    <p class="subtitle">Your money, your way — on the app, online, at an ATM or around the corner at an agent.</p>
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Ways to Bank</div>
+  </div>
+</section>
+
+<section class="py-xl">
+  <div class="container">
+    <div class="section-heading">
+      <span class="section-tag">Banking Channels</span>
+      <h2>Every channel, one seamless experience</h2>
+      <p>Move between channels freely — start a payment on the app and finish it at a branch if you like.</p>
+    </div>
+
+    <div class="channel-grid">
+      @for (channel of channels; track channel.name) {
+        <div class="card channel-card">
+          <div class="channel-top">
+            <div class="feature-icon"><i class="{{ channel.icon }}"></i></div>
+            <span class="channel-tag">{{ channel.tag }}</span>
+          </div>
+          <h3>{{ channel.name }}</h3>
+          <p>{{ channel.desc }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="py-lg bg-light">
+  <div class="container">
+    <div class="section-heading">
+      <span class="section-tag">Get Started</span>
+      <h2>Up and running in three steps</h2>
+    </div>
+    <div class="steps-row">
+      @for (step of steps; track step.num) {
+        <div class="step-card card">
+          <span class="step-num">{{ step.num }}</span>
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.text }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="py-lg">
+  <div class="container cta-panel">
+    <div>
+      <h2>Ready to bank digitally?</h2>
+      <p>Open an account today and download the Alexia-Pesa app to unlock every channel instantly.</p>
+    </div>
+    <div class="cta-actions">
+      <a routerLink="/signup" class="btn btn-primary">Open an Account</a>
+      <a routerLink="/contact" class="btn btn-outline">Contact Support</a>
+    </div>
+  </div>
+</section>

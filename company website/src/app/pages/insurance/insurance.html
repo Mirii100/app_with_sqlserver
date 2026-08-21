@@ -1,0 +1,57 @@
+<section class="page-hero">
+  <div class="container">
+    <h1>Insurance &amp; Protection</h1>
+    <p class="subtitle">Protect what matters — your family, your assets and your business — with cover that pays when it counts.</p>
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Insurance</div>
+  </div>
+</section>
+
+<section class="py-xl">
+  <div class="container">
+    <div class="section-heading">
+      <span class="section-tag">Cover Options</span>
+      <h2>Protection for every stage of life</h2>
+      <p>Underwritten by Kenya's leading insurers and serviced by Alexia advisors who know you by name.</p>
+    </div>
+
+    <div class="cover-grid">
+      @for (cover of covers; track cover.name) {
+        <div class="card cover-card">
+          <div class="feature-icon gold"><i class="{{ cover.icon }}"></i></div>
+          <h3>{{ cover.name }}</h3>
+          <p>{{ cover.desc }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="py-lg bg-light">
+  <div class="container">
+    <div class="section-heading">
+      <span class="section-tag">Our Promise</span>
+      <h2>Claims without the runaround</h2>
+    </div>
+    <div class="promise-row">
+      @for (promise of promises; track promise.text) {
+        <div class="card promise-card">
+          <i class="{{ promise.icon }}"></i>
+          <p>{{ promise.text }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="py-lg">
+  <div class="container cta-panel">
+    <div>
+      <h2>Get a quote in minutes</h2>
+      <p>Visit any branch, call us or send a message and an advisor will tailor cover to your needs and budget.</p>
+    </div>
+    <div class="cta-actions">
+      <a routerLink="/contact" class="btn btn-primary">Request a Quote</a>
+      <a routerLink="/branches" class="btn btn-outline">Find a Branch</a>
+    </div>
+  </div>
+</section>

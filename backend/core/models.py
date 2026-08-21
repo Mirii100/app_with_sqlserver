@@ -80,6 +80,62 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+def generate_payment_qr_token():
+    """Generate a unique KESHPAY token embedded in the user's payment QR."""
+    while True:
+        token = 'KESHPAY-' + ''.join(random.choices(string.digits + string.ascii_uppercase, k=8))
+        if not PaymentQrCode.objects.filter(token=token).exists():
+            return token
+
+
+class PaymentQrCode(models.Model):
+    """Canonical, scannable payment QR payload for a user.
+
+    The QR encodes this record's ``payload`` (JSON with the owner's
+    account number, email, phone number, national ID and name) plus a
+    unique ``token`` that other users can scan to pay them. Stored in
+    the database so scanned tokens can be resolved server-side.
+    """
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='payment_qr',
+    )
+    token = models.CharField(max_length=24, unique=True)
+    payload = models.TextField(help_text="JSON string encoded inside the QR image")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = generate_payment_qr_token()
+        super().save(*args, **kwargs)
+
+    def build_payload(self):
+        """Compose the QR JSON from the latest identity data."""
+        import json
+        return json.dumps({
+            'v': 1,
+            'type': 'KESHPAY',
+            'token': self.token,
+            'userId': str(self.user_id),
+            'name': self.user.full_name or self.user.username,
+            'account': self.user.account_number,
+            'email': self.user.email,
+            'phone': self.user.phone_number,
+            'nationalId': self.user.national_id or '',
+        })
+
+    def refresh_payload(self):
+        self.payload = self.build_payload()
+        self.save(update_fields=['payload', 'updated_at'])
+
+    def __str__(self):
+        return f"Payment QR for {self.user.username} ({self.token})"
+
+
 class SecuritySettings(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='security_settings')
     pin_hash = models.CharField(max_length=255, null=True, blank=True)

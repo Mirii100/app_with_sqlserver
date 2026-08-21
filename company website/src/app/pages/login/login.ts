@@ -40,7 +40,7 @@ export class Login {
     this.authService.loginWithCredentials(identifier.trim(), password).subscribe({
       next: () => {
         this.submitting = false;
-        this.router.navigate(['/account']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.submitting = false;

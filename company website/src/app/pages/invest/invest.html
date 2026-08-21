@@ -1,0 +1,53 @@
+<section class="page-hero">
+  <div class="container">
+    <h1>Invest &amp; Grow</h1>
+    <p class="subtitle">Make your money work as hard as you do — with products built for every goal and horizon.</p>
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Invest</div>
+  </div>
+</section>
+
+<section class="py-lg bg-light">
+  <div class="container">
+    <div class="stats-strip" style="margin-top: -70px; position: relative; z-index: 5;">
+      @for (item of highlights; track item.label) {
+        <div class="stat-box">
+          <span class="stat-val">{{ item.value }}</span>
+          <span class="stat-label">{{ item.label }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="py-xl">
+  <div class="container">
+    <div class="section-heading">
+      <span class="section-tag">Investment Products</span>
+      <h2>Choose how your wealth grows</h2>
+      <p>From cautious savers to confident investors, there is an Alexia plan matched to your ambition.</p>
+    </div>
+
+    <div class="invest-grid">
+      @for (product of products; track product.name) {
+        <div class="card invest-card">
+          <div class="feature-icon"><i class="{{ product.icon }}"></i></div>
+          <h3>{{ product.name }}</h3>
+          <p>{{ product.desc }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="py-lg bg-light">
+  <div class="container cta-panel">
+    <div>
+      <h2>Not sure where to start?</h2>
+      <p>Check today's deposit and foreign exchange rates, or talk to an advisor for a free portfolio review.</p>
+    </div>
+    <div class="cta-actions">
+      <a routerLink="/rates" class="btn btn-primary">View Current Rates</a>
+      <a routerLink="/contact" class="btn btn-outline">Talk to an Advisor</a>
+    </div>
+  </div>
+</section>
