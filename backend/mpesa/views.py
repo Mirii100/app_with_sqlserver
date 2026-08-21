@@ -42,10 +42,22 @@ def _generate_reference():
 
 
 def _normalise_phone(phone_number):
-    """Return phone in 254XXXXXXXXX format."""
+    """Return phone in 254XXXXXXXXX format.
+
+    Ensures the phone number has the '254' Kenya country code prefix.
+    Handles:
+    - '0712345678'  -> '254712345678'
+    - '254712345678' -> '254712345678' (already correct)
+    - '712345678'   -> '254712345678' (adds missing prefix)
+    - '+254712345678' -> '254712345678' (strips + and ensures prefix)
+    """
     phone = phone_number.strip().replace(' ', '').replace('+', '')
-    if phone.startswith('0'):
-        phone = '254' + phone[1:]
+    # Ensure '254' prefix
+    if not phone.startswith('254'):
+        if phone.startswith('0'):
+            phone = '254' + phone[1:]
+        else:
+            phone = '254' + phone
     return phone
 
 
@@ -69,6 +81,19 @@ class STKPushViewSet(viewsets.ViewSet):
         amount = data['amount']
         item_type = data['item_type']
         item_id = data['item_id']
+
+        # Enforce item_type based on shortcode configuration
+        # Shortcode 174379 is Paybill-configured only - must use item_type='paybill'
+        mpesa_shortcode = getattr(settings, 'MPESA_SHORTCODE', '')
+        if mpesa_shortcode and mpesa_shortcode == '174379' and item_type != 'paybill':
+            return Response(
+                {
+                    'error': 'Invalid item_type for this shortcode. '
+                             'Shortcode 174379 is Paybill-configured. '
+                             'Please select the Paybill option (MpesaOption.paybill).'
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         user = request.user
 

@@ -1,10 +1,13 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny ,IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status,generics
 from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
+from django.shortcuts import get_object_or_404
 
 from .serializers import UserSignupSerializer ,UserSerializer, SecuritySettingsSerializer
 from .models import User, SecuritySettings, OtpCode
@@ -311,11 +314,22 @@ def change_password(request):
     return Response({
         'message': 'Password updated successfully',
     }, status=status.HTTP_200_OK)
-
 class UserDetailView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+
+
+class UserSecuritySettingsView(APIView):
+    """Return the security settings for a specific user."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
+        security_settings = user.security_settings
+        serializer = SecuritySettingsSerializer(security_settings)
+        return Response(serializer.data)
+
 
 class SecuritySettingsViewSet(viewsets.ModelViewSet):
     queryset = SecuritySettings.objects.all()

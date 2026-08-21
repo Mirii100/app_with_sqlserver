@@ -9,8 +9,8 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from accounts.models import Account, Biller
-from accounts.models import generate_biller_account_number
+from accounts.models import Account, Biller, generate_biller_account_number
+
 from chamas.models import Chama, ChamaMembership
 from loans.models import Loan
 from stocks.fees import compute_tiered_charges, record_charges, _money

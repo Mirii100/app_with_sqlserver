@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from rest_framework.authtoken import views as drf_views
 from rest_framework import routers
-from accounts.views import AccountViewSet, BillerViewSet, BeneficiaryViewSet
+from accounts.views import AccountViewSet, CreditCardViewSet, DebitCardViewSet, UserCardSettingsViewSet
 from chamas.views import ChamaViewSet, ChamaMembershipViewSet
 from transactions.views import (
     TransactionViewSet,
@@ -15,7 +15,7 @@ from transactions.views import (
     BillPaymentViewSet,
     ReportViewSet,
 )
-from core.views import signup, login, UserDetailView, SecuritySettingsViewSet, transfer_loan_to_main, transfer_to_chama_wallet, transfer_to_goal_wallet, change_password, request_otp, verify_otp, email_statement, email_stock_statement, email_loan_statement
+from core.views import signup, login, UserDetailView, UserSecuritySettingsView, SecuritySettingsViewSet, transfer_loan_to_main, transfer_to_chama_wallet, transfer_to_goal_wallet, change_password, request_otp, verify_otp, email_statement, email_stock_statement, email_loan_statement
 from core.admin_statements import send_statements_view
 from loans.views import LoanViewSet, LoanProductViewSet
 from notifications.views import NotificationViewSet
@@ -29,8 +29,9 @@ from mpesa.views import STKPushViewSet, mpesa_callback
 from django.contrib import admin
 router = routers.DefaultRouter()
 router.register(r"accounts", AccountViewSet)
-router.register(r"billers", BillerViewSet)
-router.register(r"beneficiaries", BeneficiaryViewSet)
+router.register(r"credit-cards", CreditCardViewSet, basename='credit-card')
+router.register(r"debit-cards", DebitCardViewSet, basename='debit-card')
+router.register(r"card-settings", UserCardSettingsViewSet, basename='card-settings')
 router.register(r"chamas", ChamaViewSet)
 router.register(r"chama-memberships", ChamaMembershipViewSet)
 router.register(r"transactions", TransactionViewSet)
@@ -72,6 +73,7 @@ urlpatterns = [
     path("api/email-stock-statement/", email_stock_statement),
     path("api/email-loan-statement/", email_loan_statement),
     path("api/users/<int:pk>/", UserDetailView.as_view()),
+    path("api/users/<int:pk>/security/", UserSecuritySettingsView.as_view()),
     path("api/transfer-loan-to-main/", transfer_loan_to_main),
     path("api/transfer-to-chama-wallet/", transfer_to_chama_wallet),
     path("api/transfer-to-goal-wallet/", transfer_to_goal_wallet),

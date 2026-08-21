@@ -1,7 +1,8 @@
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Account, Biller, Beneficiary
-from .serializers import AccountSerializer, BillerSerializer, BeneficiarySerializer
+from .models import Account, CreditCard, DebitCard, UserCardSettings
+from .serializers import AccountSerializer, CreditCardSerializer, DebitCardSerializer, UserCardSettingsSerializer
+
 
 class AccountViewSet(viewsets.ModelViewSet):
     queryset = Account.objects.all()
@@ -16,16 +17,15 @@ class AccountViewSet(viewsets.ModelViewSet):
             return qs.filter(user_id=user_id)
         return qs.filter(user=self.request.user)
 
-class BillerViewSet(viewsets.ModelViewSet):
-    queryset = Biller.objects.all()
-    serializer_class = BillerSerializer
 
-class BeneficiaryViewSet(viewsets.ModelViewSet):
-    queryset = Beneficiary.objects.all()
-    serializer_class = BeneficiarySerializer
+class CreditCardViewSet(viewsets.ModelViewSet):
+    """ViewSet for Credit Card CRUD operations."""
+    
+    queryset = CreditCard.objects.all()
+    serializer_class = CreditCardSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['user']
-
+    filterset_fields = ['user', 'status', 'card_type']
+    
     def get_queryset(self):
         qs = super().get_queryset()
         user_id = self.request.query_params.get('user')
@@ -33,20 +33,34 @@ class BeneficiaryViewSet(viewsets.ModelViewSet):
             return qs.filter(user_id=user_id)
         return qs.filter(user=self.request.user)
 
-    def perform_create(self, serializer):
-        user = self.request.user
-        account_number = (
-            serializer.validated_data.get('account_number')
-            or getattr(user, 'account_number', None)
-            or ''
-        )
-        serializer.save(user=user, account_number=account_number)
 
-    def perform_update(self, serializer):
-        user = self.request.user
-        account_number = (
-            serializer.validated_data.get('account_number')
-            or getattr(user, 'account_number', None)
-            or ''
-        )
-        serializer.save(user=user, account_number=account_number)
+class DebitCardViewSet(viewsets.ModelViewSet):
+    """ViewSet for Debit Card CRUD operations."""
+    
+    queryset = DebitCard.objects.all()
+    serializer_class = DebitCardSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user', 'status', 'card_type']
+    
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user_id = self.request.query_params.get('user')
+        if user_id is not None:
+            return qs.filter(user_id=user_id)
+        return qs.filter(user=self.request.user)
+
+
+class UserCardSettingsViewSet(viewsets.ModelViewSet):
+    """ViewSet for User Card Settings."""
+    
+    queryset = UserCardSettings.objects.all()
+    serializer_class = UserCardSettingsSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user']
+    
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user_id = self.request.query_params.get('user')
+        if user_id is not None:
+            return qs.filter(user_id=user_id)
+        return qs.filter(user=self.request.user)

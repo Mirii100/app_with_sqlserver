@@ -31,5 +31,22 @@ class STKPushRequestSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=15, decimal_places=2)
     item_type = serializers.ChoiceField(choices=ITEM_TYPE_CHOICES)
     item_id = serializers.CharField(max_length=20)
-    account_reference = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    account_reference = serializers.CharField(
+        max_length=100,
+        required=False,
+        allow_blank=True,
+        help_text='Required when item_type is "paybill"'
+    )
     transaction_desc = serializers.CharField(max_length=255, required=False, allow_blank=True)
+
+    def validate(self, data):
+        item_type = data.get('item_type')
+        account_reference = data.get('account_reference')
+
+        # Make account_reference required for paybill transactions
+        if item_type == 'paybill' and not account_reference:
+            raise serializers.ValidationError({
+                'account_reference': 'Account reference is required for Paybill transactions.'
+            })
+
+        return data
